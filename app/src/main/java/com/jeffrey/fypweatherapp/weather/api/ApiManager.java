@@ -67,7 +67,7 @@ public class ApiManager {
 		Weather weather = new Weather();
 
 		try {
-			UiUtil.logDebug(TAG, "theAPI->" + urlString);
+			//UiUtil.logDebug(TAG, "theAPI->" + urlString);
 			HttpURLConnection connection = (HttpURLConnection) new URL(urlString).openConnection();
 			connection.setRequestMethod("GET");
 			connection.setConnectTimeout(5000);
@@ -84,12 +84,12 @@ public class ApiManager {
 				reader.close();
 
 				Log.d("FUCK", "API Response: " + response.toString());
-				WeatherJSON = response;
+				//WeatherJSON = response;
 
 				OpenWeatherJSON parsedData = GSON.fromJson(response.toString(), OpenWeatherJSON.class);
 
 				if (parsedData == null || !parsedData.isValid()) {
-					Log.e("ApiManager", "OpenWeatherJSON is null or invalid after parsing.");
+					Log.e("FUCK", "OpenWeatherJSON is null or invalid after parsing.");
 					throw new IllegalStateException("Failed to parse weather data.");
 				}
 
@@ -122,13 +122,15 @@ public class ApiManager {
 					aqiResponse.append(aqiLine);
 				}
 				aqiReader.close();
+
+				Log.d("FUCK", "API AQI Response: " + aqiResponse.toString());
 				AQIJSON = aqiResponse;
 
 				AirQualityResponse aqiParsedData = GSON.fromJson(aqiResponse.toString(), AirQualityResponse.class);
 				if (aqiParsedData != null) {
 					weather.AirQualityResponse = aqiParsedData;
 				} else {
-					Log.e("ApiManager", "AirQualityResponse is null or invalid after parsing.");
+					Log.e("FUCK", "AirQualityResponse is null or invalid after parsing.");
 				}
 			}
 
