@@ -17,6 +17,7 @@ import android.util.JsonReader;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -57,6 +58,7 @@ import com.jeffrey.fypweatherapp.widget.effect.ViewPager;
 
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.lang.reflect.Array;
 import java.nio.MappedByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -138,10 +140,13 @@ public class MainActivity extends FragmentActivity {
 
 	}
 	private float normalize(float value, float min, float max) {
-		if (value < min) value = min;
-		if (value > max) value = max;
+		if (min == max) {
+			// Handle edge case: if min == max, return a constant value (e.g., 0.5)
+			return 0.5f;
+		}
 		return (value - min) / (max - min);
 	}
+
 
 
 	//	private float[][][] prepareInputData(OpenWeatherJSON weather) {
@@ -193,6 +198,7 @@ public class MainActivity extends FragmentActivity {
 			inputData[0][i][7] = normalize((float) dailyForecast.windDeg, 0, 360);
 			inputData[0][i][8] = normalize((float) dailyForecast.clouds, 0, 100);
 		}
+		Log.d("FUCK", Arrays.deepToString(inputData));
 		Log.d("FUCK", "7-day input data prepared successfully.");
 		return inputData;
 	}
@@ -349,7 +355,7 @@ public class MainActivity extends FragmentActivity {
 					// Make predictions
 					String[] predictions7Days = weatherPrediction.predictWeatherDescription7Days(input7Days);
 					String[] predictions24Hours = weatherPrediction.predictWeatherDescription24Hours(input24Hours);
-					int willRainPercent = weatherPrediction.predictRainNextHour(inputRain);
+					float willRainPercent = weatherPrediction.predictRainNextHour(inputRain);
 					boolean willRain;
                     willRain = willRainPercent > 0.5;
 
@@ -377,14 +383,14 @@ public class MainActivity extends FragmentActivity {
 					}
 
 
-					// Display predictions
-					for (int i = 0; i < predictions7Days.length; i++) {
-						Log.d("FUCK", "Day " + (i + 1) + ": " + predictions7Days[i]);
-					}
-
-					for (int i = 0; i < predictions24Hours.length; i++) {
-						Log.d("FUCK", "Hour " + (i + 1) + ": " + predictions24Hours[i]);
-					}
+//					// Display predictions
+//					for (int i = 0; i < predictions7Days.length; i++) {
+//						Log.d("FUCK", "Day " + (i + 1) + ": " + predictions7Days[i]);
+//					}
+//
+//					for (int i = 0; i < predictions24Hours.length; i++) {
+//						Log.d("FUCK", "Hour " + (i + 1) + ": " + predictions24Hours[i]);
+//					}
 
 					try {
 						//boolean willRain = weatherPrediction.predictRainNextHour(inputRain);
@@ -408,24 +414,84 @@ public class MainActivity extends FragmentActivity {
 							// 7-Day Forecast
 							LinearLayout forecast7Days = findViewById(R.id.w_7day_forecast);
 							forecast7Days.removeAllViews();
+
 							for (int i = 0; i < predictions7Days.length; i++) {
-								TextView dayText = new TextView(this);
-								dayText.setText("Day " + (i + 1) + ": " + predictions7Days[i]);
-								dayText.setTextColor(getResources().getColor(R.color.w_text_primary));
-								dayText.setTextSize(16);
-								forecast7Days.addView(dayText);
+								// Create a vertical layout for each day's forecast
+								LinearLayout dayLayout = new LinearLayout(this);
+								dayLayout.setOrientation(LinearLayout.HORIZONTAL);
+								dayLayout.setPadding(8, 8, 8, 8); // Add padding
+								dayLayout.setWeightSum(3);
+
+								// Day label
+								TextView dayLabel = new TextView(this);
+								dayLabel.setText("Day " + (i + 1) + ": ");
+								dayLabel.setTextColor(getResources().getColor(R.color.w_text_primary));
+								dayLabel.setTextSize(16);
+								dayLabel.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+
+								// Forecast data
+								TextView dayForecast = new TextView(this);
+								dayForecast.setText(predictions7Days[i]);
+								dayForecast.setTextColor(getResources().getColor(R.color.w_text_secondary));
+								dayForecast.setTextSize(16);
+								dayForecast.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 2));
+
+								// Add views to the horizontal layout
+								dayLayout.addView(dayLabel);
+								dayLayout.addView(dayForecast);
+
+								// Add horizontal layout to the parent LinearLayout
+								forecast7Days.addView(dayLayout);
+
+								// Add a divider between days
+								View divider = new View(this);
+								divider.setLayoutParams(new LinearLayout.LayoutParams(
+										LinearLayout.LayoutParams.MATCH_PARENT, 1));
+								divider.setBackgroundColor(getResources().getColor(R.color.w_text_secondary));
+								forecast7Days.addView(divider);
 							}
+
 
 							// 24-Hour Forecast
 							LinearLayout forecast24Hours = findViewById(R.id.w_24hour_forecast);
 							forecast24Hours.removeAllViews();
+
 							for (int i = 0; i < predictions24Hours.length; i++) {
-								TextView hourText = new TextView(this);
-								hourText.setText("Hour " + (i + 1) + ": " + predictions24Hours[i]);
-								hourText.setTextColor(getResources().getColor(R.color.w_text_primary));
-								hourText.setTextSize(16);
-								forecast24Hours.addView(hourText);
+								// Create a horizontal LinearLayout for each hour's forecast
+								LinearLayout hourLayout = new LinearLayout(this);
+								hourLayout.setOrientation(LinearLayout.HORIZONTAL);
+								hourLayout.setPadding(8, 8, 8, 8); // Add padding
+								hourLayout.setWeightSum(3); // Total weight for equal distribution
+
+								// Hour label
+								TextView hourLabel = new TextView(this);
+								hourLabel.setText("Hour " + (i + 1) + ": ");
+								hourLabel.setTextColor(getResources().getColor(R.color.w_text_primary));
+								hourLabel.setTextSize(16);
+								hourLabel.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+
+								// Forecast data
+								TextView hourForecast = new TextView(this);
+								hourForecast.setText(predictions24Hours[i]);
+								hourForecast.setTextColor(getResources().getColor(R.color.w_text_secondary));
+								hourForecast.setTextSize(16);
+								hourForecast.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 2));
+
+								// Add views to the horizontal layout
+								hourLayout.addView(hourLabel);
+								hourLayout.addView(hourForecast);
+
+								// Add horizontal layout to the parent LinearLayout
+								forecast24Hours.addView(hourLayout);
+
+								// Add a divider for better visibility
+								View divider = new View(this);
+								divider.setLayoutParams(new LinearLayout.LayoutParams(
+										LinearLayout.LayoutParams.MATCH_PARENT, 1));
+								divider.setBackgroundColor(getResources().getColor(R.color.w_text_secondary));
+								forecast24Hours.addView(divider);
 							}
+
 
 							// Rain Prediction
 							TextView rainPrediction = findViewById(R.id.w_rain_prediction);
@@ -575,7 +641,6 @@ public class MainActivity extends FragmentActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	@Override
 	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
 										   @NonNull int[] grantResults) {
 		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
