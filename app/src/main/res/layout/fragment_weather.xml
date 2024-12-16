@@ -423,7 +423,7 @@
 
             <TextView
                 style="@style/w_section_title"
-                android:text="24-Hour Forecast" />
+                android:text="24-Hour Detailed Forecast" />
 
             <LinearLayout
                 android:id="@+id/w_24hour_forecast"
@@ -439,7 +439,7 @@
 
             <TextView
                 style="@style/w_section_title"
-                android:text="7-Day Forecast" />
+                android:text="7-Day Detailed Forecast" />
 
             <LinearLayout
                 android:id="@+id/w_7day_forecast"
