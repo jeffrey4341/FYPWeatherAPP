@@ -38,19 +38,10 @@ public class CurrentWeather implements Serializable {
     @SerializedName("wind_gust")
     public double windGust;
     @SerializedName("rain")
-    public List<Rain> rain;
+    public Rain rain;
 
     @SerializedName("weather")
     public List<WeatherCondition> weather;
-
-
-    // Nested class Rain
-    public static class Rain implements Serializable {
-        private static final long serialVersionUID = 6529685098267757702L;
-
-        @SerializedName("1h")
-        public double hour;
-    }
 
     // Nested class WeatherCondition
     public static class WeatherCondition implements Serializable {
