@@ -112,7 +112,10 @@ public class AstroView extends View {
 			canvas.rotate(curRotate * 360f);
 			float speed = (float) Math.max(currentWeather.windSpeed, 0.75f);
 			curRotate += 0.001f * speed;
-			if (curRotate > 1f) {
+			if (curRotate >= 1f) {
+				curRotate = 0f;
+			}
+			if (currentWeather.windSpeed == 0) {
 				curRotate = 0f;
 			}
 			paint.setStyle(Style.FILL);
