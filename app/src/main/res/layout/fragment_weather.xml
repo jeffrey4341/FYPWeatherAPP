@@ -247,6 +247,24 @@
                 android:layout_height="@dimen/w_divider_size"
                 android:background="@color/w_divider" />
 
+            <TextView
+                style="@style/w_section_title"
+                android:text="Rain Prediction" />
+
+            <TextView
+                android:id="@+id/w_rain_prediction"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Rain Prediction: Loading..."
+                android:textColor="@color/w_text_primary"
+                android:textSize="16dp"
+                android:padding="8dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/w_divider_size"
+                android:background="@color/w_divider" />
+
             <!-- 空气质量 -->
 
             <TextView
@@ -402,203 +420,232 @@
                 android:layout_height="@dimen/w_divider_size"
                 android:background="@color/w_divider" />
 
+
             <TextView
                 style="@style/w_section_title"
-                android:text="生活指数" />
+                android:text="24-Hour Forecast" />
 
-            <RelativeLayout
+            <LinearLayout
+                android:id="@+id/w_24hour_forecast"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp" >
+                android:orientation="vertical"
+                android:padding="8dp" />
 
-                <ImageView
-                    style="@style/suggestion_image"
-                    android:src="@drawable/ic_suggestion_comf" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/w_divider_size"
+                android:background="@color/w_divider" />
 
-                <TextView
-                    style="@style/suggestion_title"
-                    android:text="综合"
-                    android:textColor="@color/w_text_primary"
-                    android:textSize="16dp" />
+            <TextView
+                style="@style/w_section_title"
+                android:text="7-Day Forecast" />
 
-                <TextView
-                    android:id="@+id/w_suggestion_comf_brf"
-                    style="@style/suggestion_brf"
-                    android:text="" />
-
-                <TextView
-                    android:id="@+id/w_suggestion_comf"
-                    style="@style/suggestion_info_content"
-                    android:layout_below="@id/w_suggestion_comf_brf" />
-            </RelativeLayout>
-
-            <View style="@style/suggestion_divider" />
-
-            <RelativeLayout
+            <LinearLayout
+                android:id="@+id/w_7day_forecast"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp" >
+                android:orientation="vertical"
+                android:padding="8dp" />
 
-                <ImageView
-                    style="@style/suggestion_image"
-                    android:src="@drawable/ic_suggestion_drsg" />
 
-                <TextView
-                    style="@style/suggestion_title"
-                    android:text="穿衣"
-                    android:textColor="@color/w_text_primary"
-                    android:textSize="16dp" />
+<!--            <TextView-->
+<!--                style="@style/w_section_title"-->
+<!--                android:text="生活指数" />-->
 
-                <TextView
-                    android:id="@+id/w_suggestion_drsg_brf"
-                    style="@style/suggestion_brf"
-                    android:text="" />
+<!--            <RelativeLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginLeft="16dp" >-->
 
-                <TextView
-                    android:id="@+id/w_suggestion_drsg"
-                    style="@style/suggestion_info_content"
-                    android:layout_below="@+id/w_suggestion_drsg_brf" />
-            </RelativeLayout>
+<!--                <ImageView-->
+<!--                    style="@style/suggestion_image"-->
+<!--                    android:src="@drawable/ic_suggestion_comf" />-->
 
-            <View style="@style/suggestion_divider" />
+<!--                <TextView-->
+<!--                    style="@style/suggestion_title"-->
+<!--                    android:text="综合"-->
+<!--                    android:textColor="@color/w_text_primary"-->
+<!--                    android:textSize="16dp" />-->
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp" >
+<!--                <TextView-->
+<!--                    android:id="@+id/w_suggestion_comf_brf"-->
+<!--                    style="@style/suggestion_brf"-->
+<!--                    android:text="" />-->
 
-                <ImageView
-                    style="@style/suggestion_image"
-                    android:src="@drawable/ic_suggestion_uv" />
+<!--                <TextView-->
+<!--                    android:id="@+id/w_suggestion_comf"-->
+<!--                    style="@style/suggestion_info_content"-->
+<!--                    android:layout_below="@id/w_suggestion_comf_brf" />-->
+<!--            </RelativeLayout>-->
 
-                <TextView
-                    style="@style/suggestion_title"
-                    android:text="紫外线"
-                    android:textColor="@color/w_text_primary"
-                    android:textSize="16dp" />
+<!--            <View style="@style/suggestion_divider" />-->
 
-                <TextView
-                    android:id="@+id/w_suggestion_uv_brf"
-                    style="@style/suggestion_brf"
-                    android:text="" />
+<!--            <RelativeLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginLeft="16dp" >-->
 
-                <TextView
-                    android:id="@+id/w_suggestion_uv"
-                    style="@style/suggestion_info_content"
-                    android:layout_below="@+id/w_suggestion_uv_brf" />
-            </RelativeLayout>
+<!--                <ImageView-->
+<!--                    style="@style/suggestion_image"-->
+<!--                    android:src="@drawable/ic_suggestion_drsg" />-->
 
-            <View style="@style/suggestion_divider" />
+<!--                <TextView-->
+<!--                    style="@style/suggestion_title"-->
+<!--                    android:text="穿衣"-->
+<!--                    android:textColor="@color/w_text_primary"-->
+<!--                    android:textSize="16dp" />-->
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp" >
+<!--                <TextView-->
+<!--                    android:id="@+id/w_suggestion_drsg_brf"-->
+<!--                    style="@style/suggestion_brf"-->
+<!--                    android:text="" />-->
 
-                <ImageView
-                    style="@style/suggestion_image"
-                    android:src="@drawable/ic_suggestion_sport" />
+<!--                <TextView-->
+<!--                    android:id="@+id/w_suggestion_drsg"-->
+<!--                    style="@style/suggestion_info_content"-->
+<!--                    android:layout_below="@+id/w_suggestion_drsg_brf" />-->
+<!--            </RelativeLayout>-->
 
-                <TextView
-                    style="@style/suggestion_title"
-                    android:text="运动"
-                    android:textColor="@color/w_text_primary"
-                    android:textSize="16dp" />
+<!--            <View style="@style/suggestion_divider" />-->
 
-                <TextView
-                    android:id="@+id/w_suggestion_sport_brf"
-                    style="@style/suggestion_brf"
-                    android:text="" />
+<!--            <RelativeLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginLeft="16dp" >-->
 
-                <TextView
-                    android:id="@+id/w_suggestion_sport"
-                    style="@style/suggestion_info_content"
-                    android:layout_below="@+id/w_suggestion_sport_brf" />
-            </RelativeLayout>
+<!--                <ImageView-->
+<!--                    style="@style/suggestion_image"-->
+<!--                    android:src="@drawable/ic_suggestion_uv" />-->
 
-            <View style="@style/suggestion_divider" />
+<!--                <TextView-->
+<!--                    style="@style/suggestion_title"-->
+<!--                    android:text="紫外线"-->
+<!--                    android:textColor="@color/w_text_primary"-->
+<!--                    android:textSize="16dp" />-->
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp" >
+<!--                <TextView-->
+<!--                    android:id="@+id/w_suggestion_uv_brf"-->
+<!--                    style="@style/suggestion_brf"-->
+<!--                    android:text="" />-->
 
-                <ImageView
-                    style="@style/suggestion_image"
-                    android:src="@drawable/ic_suggestion_flu" />
+<!--                <TextView-->
+<!--                    android:id="@+id/w_suggestion_uv"-->
+<!--                    style="@style/suggestion_info_content"-->
+<!--                    android:layout_below="@+id/w_suggestion_uv_brf" />-->
+<!--            </RelativeLayout>-->
 
-                <TextView
-                    style="@style/suggestion_title"
-                    android:text="感冒"
-                    android:textColor="@color/w_text_primary"
-                    android:textSize="16dp" />
+<!--            <View style="@style/suggestion_divider" />-->
 
-                <TextView
-                    android:id="@+id/w_suggestion_flu_brf"
-                    style="@style/suggestion_brf"
-                    android:text="" />
+<!--            <RelativeLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginLeft="16dp" >-->
 
-                <TextView
-                    android:id="@+id/w_suggestion_flu"
-                    style="@style/suggestion_info_content"
-                    android:layout_below="@+id/w_suggestion_flu_brf" />
-            </RelativeLayout>
+<!--                <ImageView-->
+<!--                    style="@style/suggestion_image"-->
+<!--                    android:src="@drawable/ic_suggestion_sport" />-->
 
-            <View style="@style/suggestion_divider" />
+<!--                <TextView-->
+<!--                    style="@style/suggestion_title"-->
+<!--                    android:text="运动"-->
+<!--                    android:textColor="@color/w_text_primary"-->
+<!--                    android:textSize="16dp" />-->
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp" >
+<!--                <TextView-->
+<!--                    android:id="@+id/w_suggestion_sport_brf"-->
+<!--                    style="@style/suggestion_brf"-->
+<!--                    android:text="" />-->
 
-                <ImageView
-                    style="@style/suggestion_image"
-                    android:src="@drawable/ic_suggestion_trav" />
+<!--                <TextView-->
+<!--                    android:id="@+id/w_suggestion_sport"-->
+<!--                    style="@style/suggestion_info_content"-->
+<!--                    android:layout_below="@+id/w_suggestion_sport_brf" />-->
+<!--            </RelativeLayout>-->
 
-                <TextView
-                    style="@style/suggestion_title"
-                    android:text="旅游"
-                    android:textColor="@color/w_text_primary"
-                    android:textSize="16dp" />
+<!--            <View style="@style/suggestion_divider" />-->
 
-                <TextView
-                    android:id="@+id/w_suggestion_tarv_brf"
-                    style="@style/suggestion_brf"
-                    android:text="" />
+<!--            <RelativeLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginLeft="16dp" >-->
 
-                <TextView
-                    android:id="@+id/w_suggestion_tarv"
-                    style="@style/suggestion_info_content"
-                    android:layout_below="@+id/w_suggestion_tarv_brf" />
-            </RelativeLayout>
+<!--                <ImageView-->
+<!--                    style="@style/suggestion_image"-->
+<!--                    android:src="@drawable/ic_suggestion_flu" />-->
 
-            <View style="@style/suggestion_divider" />
+<!--                <TextView-->
+<!--                    style="@style/suggestion_title"-->
+<!--                    android:text="感冒"-->
+<!--                    android:textColor="@color/w_text_primary"-->
+<!--                    android:textSize="16dp" />-->
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp" >
+<!--                <TextView-->
+<!--                    android:id="@+id/w_suggestion_flu_brf"-->
+<!--                    style="@style/suggestion_brf"-->
+<!--                    android:text="" />-->
 
-                <ImageView
-                    style="@style/suggestion_image"
-                    android:src="@drawable/ic_suggestion_cw" />
+<!--                <TextView-->
+<!--                    android:id="@+id/w_suggestion_flu"-->
+<!--                    style="@style/suggestion_info_content"-->
+<!--                    android:layout_below="@+id/w_suggestion_flu_brf" />-->
+<!--            </RelativeLayout>-->
 
-                <TextView
-                    style="@style/suggestion_title"
-                    android:text="洗车"
-                    android:textColor="@color/w_text_primary"
-                    android:textSize="16dp" />
+<!--            <View style="@style/suggestion_divider" />-->
 
-                <TextView
-                    android:id="@+id/w_suggestion_cw_brf"
-                    style="@style/suggestion_brf"
-                    android:text="" />
+<!--            <RelativeLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginLeft="16dp" >-->
 
-                <TextView
-                    android:id="@+id/w_suggestion_cw"
-                    style="@style/suggestion_info_content"
-                    android:layout_below="@+id/w_suggestion_cw_brf" />
-            </RelativeLayout>
+<!--                <ImageView-->
+<!--                    style="@style/suggestion_image"-->
+<!--                    android:src="@drawable/ic_suggestion_trav" />-->
+
+<!--                <TextView-->
+<!--                    style="@style/suggestion_title"-->
+<!--                    android:text="旅游"-->
+<!--                    android:textColor="@color/w_text_primary"-->
+<!--                    android:textSize="16dp" />-->
+
+<!--                <TextView-->
+<!--                    android:id="@+id/w_suggestion_tarv_brf"-->
+<!--                    style="@style/suggestion_brf"-->
+<!--                    android:text="" />-->
+
+<!--                <TextView-->
+<!--                    android:id="@+id/w_suggestion_tarv"-->
+<!--                    style="@style/suggestion_info_content"-->
+<!--                    android:layout_below="@+id/w_suggestion_tarv_brf" />-->
+<!--            </RelativeLayout>-->
+
+<!--            <View style="@style/suggestion_divider" />-->
+
+<!--            <RelativeLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginLeft="16dp" >-->
+
+<!--                <ImageView-->
+<!--                    style="@style/suggestion_image"-->
+<!--                    android:src="@drawable/ic_suggestion_cw" />-->
+
+<!--                <TextView-->
+<!--                    style="@style/suggestion_title"-->
+<!--                    android:text="洗车"-->
+<!--                    android:textColor="@color/w_text_primary"-->
+<!--                    android:textSize="16dp" />-->
+
+<!--                <TextView-->
+<!--                    android:id="@+id/w_suggestion_cw_brf"-->
+<!--                    style="@style/suggestion_brf"-->
+<!--                    android:text="" />-->
+
+<!--                <TextView-->
+<!--                    android:id="@+id/w_suggestion_cw"-->
+<!--                    style="@style/suggestion_info_content"-->
+<!--                    android:layout_below="@+id/w_suggestion_cw_brf" />-->
+<!--            </RelativeLayout>-->
 
             <View style="@style/suggestion_divider" />
 
