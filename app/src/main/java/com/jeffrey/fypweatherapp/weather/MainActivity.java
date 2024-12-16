@@ -21,6 +21,8 @@ import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -44,6 +46,7 @@ import com.jeffrey.fypweatherapp.util.TimingLogger;
 import com.jeffrey.fypweatherapp.util.UiUtil;
 import com.jeffrey.fypweatherapp.weather.api.ApiManager;
 import com.jeffrey.fypweatherapp.weather.api.entity.AirQualityResponse;
+import com.jeffrey.fypweatherapp.weather.api.entity.CurrentWeather;
 import com.jeffrey.fypweatherapp.weather.api.entity.DailyForecast;
 import com.jeffrey.fypweatherapp.weather.api.entity.HourlyForecast;
 import com.jeffrey.fypweatherapp.weather.api.entity.OpenWeatherJSON;
@@ -135,33 +138,130 @@ public class MainActivity extends FragmentActivity {
 
 	}
 	private float normalize(float value, float min, float max) {
+		if (value < min) value = min;
+		if (value > max) value = max;
 		return (value - min) / (max - min);
 	}
 
-	private float[][][] prepareInputData(OpenWeatherJSON weather) {
-		int totalHours = weather.hourly.size(); // Total hourly data points available
-		int days = Math.min(totalHours / 48, 7);    // Calculate the number of full days (24-hour blocks) to process
-		float[][][] inputData = new float[days][24][9]; // Adjust dimensions for days, hours, and features
 
-		for (int hour = 0; hour < 24; hour++) {
-			int index = totalHours - 24 + hour; // Start from the last 24 hours in the hourly array
-			HourlyForecast hourlyForecast = weather.hourly.get(index);
-			DailyForecast dailyForecast = weather.daily.get(0); // Use today's daily forecast data
+	//	private float[][][] prepareInputData(OpenWeatherJSON weather) {
+//		int totalHours = weather.hourly.size(); // Total hourly data points available
+//		int days = Math.min(totalHours / 48, 7);    // Calculate the number of full days (24-hour blocks) to process
+//		float[][][] inputData = new float[days][24][9]; // Adjust dimensions for days, hours, and features
+//
+//		for (int hour = 0; hour < 24; hour++) {
+//			int index = totalHours - 24 + hour; // Start from the last 24 hours in the hourly array
+//			HourlyForecast hourlyForecast = weather.hourly.get(index);
+//			DailyForecast dailyForecast = weather.daily.get(0); // Use today's daily forecast data
+//
+//			// Extract features for each hour
+//			inputData[0][hour][0] = normalize((float) hourlyForecast.temp, 0, 50);            // Hourly temperature
+//			inputData[0][hour][1] = normalize((float) hourlyForecast.feelsLike, 0, 50);      // Feels-like temperature
+//			inputData[0][hour][2] = normalize((float) hourlyForecast.pressure, 900, 1100);   // Atmospheric pressure
+//			inputData[0][hour][3] = normalize((float) hourlyForecast.humidity, 0, 100);      // Humidity percentage
+//			inputData[0][hour][4] = normalize((float) dailyForecast.temp.min, 0, 50);        // Daily min temperature
+//			inputData[0][hour][5] = normalize((float) dailyForecast.temp.max, 0, 50);        // Daily max temperature
+//			inputData[0][hour][6] = normalize((float) hourlyForecast.windSpeed, 0, 20);      // Wind speed
+//			inputData[0][hour][7] = normalize((float) hourlyForecast.windDeg, 0, 360);       // Wind direction
+//			inputData[0][hour][8] = normalize((float) hourlyForecast.clouds, 0, 100);        // Cloudiness percentage
+//		}
+//
+//		return inputData;
+//	}
+	private float[][][] prepare7DaysPredictionInput(OpenWeatherJSON weather) {
+		int timeSteps = 7; // 7 days
+		int features = 9; // Number of features per day
 
-			// Extract features for each hour
-			inputData[0][hour][0] = normalize((float) hourlyForecast.temp, 0, 50);            // Hourly temperature
-			inputData[0][hour][1] = normalize((float) hourlyForecast.feelsLike, 0, 50);      // Feels-like temperature
-			inputData[0][hour][2] = normalize((float) hourlyForecast.pressure, 900, 1100);   // Atmospheric pressure
-			inputData[0][hour][3] = normalize((float) hourlyForecast.humidity, 0, 100);      // Humidity percentage
-			inputData[0][hour][4] = normalize((float) dailyForecast.temp.min, 0, 50);        // Daily min temperature
-			inputData[0][hour][5] = normalize((float) dailyForecast.temp.max, 0, 50);        // Daily max temperature
-			inputData[0][hour][6] = normalize((float) hourlyForecast.windSpeed, 0, 20);      // Wind speed
-			inputData[0][hour][7] = normalize((float) hourlyForecast.windDeg, 0, 360);       // Wind direction
-			inputData[0][hour][8] = normalize((float) hourlyForecast.clouds, 0, 100);        // Cloudiness percentage
+		// Ensure there are enough daily data points
+		if (weather.daily == null || weather.daily.size() < timeSteps) {
+			Log.e("FUCK", "Not enough daily data for 7-day prediction. Found: " +
+					(weather.daily == null ? 0 : weather.daily.size()));
+			return null;
 		}
 
+		float[][][] inputData = new float[1][timeSteps][features]; // [Batch, TimeSteps, Features]
+
+		for (int i = 0; i < 7; i++) {
+			DailyForecast dailyForecast = weather.daily.get(i);
+			inputData[0][i][0] = normalize((float) dailyForecast.temp.day, 0, 50);
+			inputData[0][i][1] = normalize((float) dailyForecast.feelsLike.day, 0, 50);
+			inputData[0][i][2] = normalize((float) dailyForecast.pressure, 900, 1100);
+			inputData[0][i][3] = normalize((float) dailyForecast.humidity, 0, 100);
+			inputData[0][i][4] = normalize((float) dailyForecast.temp.min, 0, 50);
+			inputData[0][i][5] = normalize((float) dailyForecast.temp.max, 0, 50);
+			inputData[0][i][6] = normalize((float) dailyForecast.windSpeed, 0, 20);
+			inputData[0][i][7] = normalize((float) dailyForecast.windDeg, 0, 360);
+			inputData[0][i][8] = normalize((float) dailyForecast.clouds, 0, 100);
+		}
+		Log.d("FUCK", "7-day input data prepared successfully.");
 		return inputData;
 	}
+
+	private float[][][] prepare24HoursPredictionInput(OpenWeatherJSON weather) {
+		int timeSteps = 24; // 24 hours
+		int features = 9; // Number of features per hour
+
+		// Ensure there are enough hourly data points
+		if (weather.hourly == null || weather.hourly.size() < timeSteps) {
+			Log.e("	FUCK", "Not enough hourly data for 24-hour prediction. Found: " +
+					(weather.hourly == null ? 0 : weather.hourly.size()));
+			return null;
+		}
+
+		float[][][] inputData = new float[1][timeSteps][features]; // [Batch, TimeSteps, Features]
+
+		for (int i = 0; i < timeSteps; i++) {
+			HourlyForecast hourlyForecast = weather.hourly.get(i);
+			DailyForecast dailyForecast = weather.daily.get(0);
+
+			// Extract features
+			inputData[0][i][0] = normalize((float) hourlyForecast.temp, 0, 50);         // Hourly temperature
+			inputData[0][i][1] = normalize((float) hourlyForecast.feelsLike, 0, 50);   // Feels-like temperature
+			inputData[0][i][2] = normalize((float) hourlyForecast.pressure, 900, 1100); // Pressure
+			inputData[0][i][3] = normalize((float) hourlyForecast.humidity, 0, 100);   // Humidity
+			inputData[0][i][4] = normalize((float) dailyForecast.temp.min, 0, 50);        // Temp min placeholder
+			inputData[0][i][5] = normalize((float) dailyForecast.temp.max, 0, 50);        // Temp max placeholder
+			inputData[0][i][6] = normalize((float) hourlyForecast.windSpeed, 0, 20);   // Wind speed
+			inputData[0][i][7] = normalize((float) hourlyForecast.windDeg, 0, 360);    // Wind direction
+			inputData[0][i][8] = normalize((float) hourlyForecast.clouds, 0, 100);     // Clouds
+		}
+		Log.d("FUCK", "24-hour input data prepared successfully.");
+		return inputData;
+	}
+
+
+	private float[][][] prepareRainPredictionInput(OpenWeatherJSON weather) {
+		int timeSteps = 1; // Current weather (single time step)
+		int features = 9; // Number of features
+
+		// Ensure current weather data exists
+		if (weather.current == null) {
+			Log.e("WeatherPrediction", "No current weather data available.");
+			return null;
+		}
+		CurrentWeather current = weather.current;
+		DailyForecast dailyForecast = weather.daily.get(0);
+
+		// Prepare 3D input tensor [1, 12, 9]
+		float[][][] inputData = new float[1][timeSteps][features]; // [Batch, TimeSteps, Features]
+
+		// Populate data for the 12 time steps
+		inputData[0][0][0] = normalize((float) current.temp, 0, 50);             // Current temperature
+		inputData[0][0][1] = normalize((float) current.feelsLike, 0, 50);       // Feels-like temperature
+		inputData[0][0][2] = normalize((float) current.pressure, 900, 1100);    // Pressure
+		inputData[0][0][3] = normalize((float) current.humidity, 0, 100);       // Humidity
+		inputData[0][0][4] = normalize((float) dailyForecast.temp.min, 0, 50);            // Temp min (placeholder)
+		inputData[0][0][5] = normalize((float) dailyForecast.temp.max, 0, 50);            // Temp max (placeholder)
+		inputData[0][0][6] = normalize((float) current.windSpeed, 0, 20);       // Wind speed
+		inputData[0][0][7] = normalize((float) current.windDeg, 0, 360);        // Wind direction
+		inputData[0][0][8] = normalize((float) current.clouds, 0, 100);         // Cloud coverage
+
+		Log.d("FUCK", "Rain prediction input data prepared successfully.");
+		return inputData;
+	}
+
+
+
 
 	public void getLastLocation() {
 		if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -237,30 +337,139 @@ public class MainActivity extends FragmentActivity {
 				});
 
 				// AI Prediction Part
+				// AI Predictions for 7-day, 24-hour, and rain prediction
 				try {
-					// Load the TFLite model
-					WeatherPrediction prediction = new WeatherPrediction(this, "model/weather_forecast_model.tflite");
-//					MappedByteBuffer model = loadModelFile("model/weather_forecast_model.tflite");
-//					WeatherPrediction prediction = new WeatherPrediction("model/weather_forecast_model.tflite");
+					WeatherPrediction weatherPrediction = new WeatherPrediction(this);
 
-					// Load sample weather JSON
-					// InputStreamReader reader = new InputStreamReader(getAssets().open("sample_openweather.json"));
-					OpenWeatherJSON weatherData = weather.getOpenWeatherJSON();
+					// Prepare input data
+					float[][][] input7Days = prepare7DaysPredictionInput(weather.getOpenWeatherJSON());
+					float[][][] input24Hours = prepare24HoursPredictionInput(weather.getOpenWeatherJSON());
+					float[][][] inputRain = prepareRainPredictionInput(weather.getOpenWeatherJSON());
 
-					if (weatherData != null && weatherData.hourly != null && !weatherData.hourly.isEmpty()) {
-						float[][][] dailyInputData = prepareInputData(weatherData);
+					// Make predictions
+					String[] predictions7Days = weatherPrediction.predictWeatherDescription7Days(input7Days);
+					String[] predictions24Hours = weatherPrediction.predictWeatherDescription24Hours(input24Hours);
+					int willRainPercent = weatherPrediction.predictRainNextHour(inputRain);
+					boolean willRain;
+                    willRain = willRainPercent > 0.5;
 
-						// Categories used in training
-						String[] weatherCategories = {"Thunderstorm", "Drizzle", "Rain", "Clouds", "Clear"};
+					// Log results
+					Log.d("FUCK", "7-day Predictions: " + Arrays.toString(predictions7Days));
+					Log.d("FUCK", "24-hour Predictions: " + Arrays.toString(predictions24Hours));
+					Log.d("FUCK", "Rain Percent Predictions: " + willRainPercent);
+					Log.d("FUCK", "Rain Prediction: " + (willRain ? "Rain" : "No Rain"));
 
-						// Predict for the next 7 days
-						prediction.predictNext24Hours(dailyInputData, weatherCategories);
+
+					if (predictions7Days != null) {
+						for (int i = 0; i < predictions7Days.length; i++) {
+							Log.d("FUCK", "Day " + (i + 1) + ": " + predictions7Days[i]);
+						}
 					} else {
-						Log.e("FUCK", "Invalid or empty daily weather data.");
+						Log.e("FUCK", "predictions7Days is null.");
 					}
+
+					if (predictions24Hours != null) {
+						for (int i = 0; i < predictions24Hours.length; i++) {
+							Log.d("FUCK", "Hour " + (i + 1) + ": " + predictions24Hours[i]);
+						}
+					} else {
+						Log.e("FUCK", "predictions24Hours is null.");
+					}
+
+
+					// Display predictions
+					for (int i = 0; i < predictions7Days.length; i++) {
+						Log.d("FUCK", "Day " + (i + 1) + ": " + predictions7Days[i]);
+					}
+
+					for (int i = 0; i < predictions24Hours.length; i++) {
+						Log.d("FUCK", "Hour " + (i + 1) + ": " + predictions24Hours[i]);
+					}
+
+					try {
+						//boolean willRain = weatherPrediction.predictRainNextHour(inputRain);
+
+						// Ensure Toast runs on the main thread
+						runOnUiThread(() -> {
+							Toast.makeText(
+									MainActivity.this,
+									willRain ? "Rain expected in the next hour." : "No rain expected in the next hour.",
+									Toast.LENGTH_LONG
+							).show();
+						});
+
+						Log.d("FUCK", "Rain expected in the next hour: " + willRain);
+					} catch (Exception e) {
+						Log.e("FUCK", "Error in weather prediction", e);
+					}
+
+					runOnUiThread(() -> {
+						try {
+							// 7-Day Forecast
+							LinearLayout forecast7Days = findViewById(R.id.w_7day_forecast);
+							forecast7Days.removeAllViews();
+							for (int i = 0; i < predictions7Days.length; i++) {
+								TextView dayText = new TextView(this);
+								dayText.setText("Day " + (i + 1) + ": " + predictions7Days[i]);
+								dayText.setTextColor(getResources().getColor(R.color.w_text_primary));
+								dayText.setTextSize(16);
+								forecast7Days.addView(dayText);
+							}
+
+							// 24-Hour Forecast
+							LinearLayout forecast24Hours = findViewById(R.id.w_24hour_forecast);
+							forecast24Hours.removeAllViews();
+							for (int i = 0; i < predictions24Hours.length; i++) {
+								TextView hourText = new TextView(this);
+								hourText.setText("Hour " + (i + 1) + ": " + predictions24Hours[i]);
+								hourText.setTextColor(getResources().getColor(R.color.w_text_primary));
+								hourText.setTextSize(16);
+								forecast24Hours.addView(hourText);
+							}
+
+							// Rain Prediction
+							TextView rainPrediction = findViewById(R.id.w_rain_prediction);
+							rainPrediction.setText(willRain
+									? "Rain expected in the next hour.\nRain Percentage: " + willRainPercent + "%"
+									: "No rain expected in the next hour.\nRain Percentage: " + willRainPercent + "%");
+
+
+						} catch (Exception e) {
+							Log.e("FUCK", "Error updating weather UI", e);
+						}
+					});
+
 				} catch (Exception e) {
-					Log.e("FUCK", "Error during prediction", e);
+					Log.e("FUCK", "Error in weather prediction", e);
 				}
+
+
+
+//				try {
+//					// Load the TFLite model
+//					WeatherPrediction prediction = new WeatherPrediction(this, "model/weather_forecast_model.tflite");
+////					MappedByteBuffer model = loadModelFile("model/weather_forecast_model.tflite");
+////					WeatherPrediction prediction = new WeatherPrediction("model/weather_forecast_model.tflite");
+//
+//					// Load sample weather JSON
+//					// InputStreamReader reader = new InputStreamReader(getAssets().open("sample_openweather.json"));
+//					OpenWeatherJSON weatherData = weather.getOpenWeatherJSON();
+//
+//					if (weatherData != null && weatherData.hourly != null && !weatherData.hourly.isEmpty()) {
+//						float[][][] dailyInputData = prepareInputData(weatherData);
+//
+//						// Categories used in training
+//						String[] weatherCategories = {"Thunderstorm", "Drizzle", "Rain", "Clouds", "Clear"};
+//
+//						// Predict for the next 7 days
+//						prediction.predictNext24Hours(dailyInputData, weatherCategories);
+//					} else {
+//						Log.e("FUCK", "Invalid or empty daily weather data.");
+//					}
+//				} catch (Exception e) {
+//					Log.e("FUCK", "Error during prediction", e);
+//				}
+
 
 
 			} catch (Exception e) {

@@ -503,7 +503,7 @@ public class WeatherFragment extends BaseFragment {
 //			setTextViewString(R.id.w_now_wind_sc, String.valueOf(w.current.windSpeed));
 //			setTextViewString(R.id.w_now_pres, String.valueOf(w.current.pressure));
 			if (!(w.current.rain == null)) {
-				setTextViewString(R.id.w_now_pcpn, (w.current.rain.get(0).hour) + "mm/h"); // 降雨量
+				setTextViewString(R.id.w_now_pcpn, (w.current.rain.hour) + "mm/h"); // 降雨量
 			} else {
 				setTextViewString(R.id.w_now_pcpn, 0 + "mm/h"); // 降雨量
 			}
@@ -548,23 +548,25 @@ public class WeatherFragment extends BaseFragment {
 			setTextViewString(R.id.w_aqi_so2, a.list.get(0).components.so2 + "μg/m³");
 			setTextViewString(R.id.w_aqi_no2, a.list.get(0).components.no2 + "μg/m³");
 
-			if (w.alerts != null) {
-				setTextViewString(R.id.w_suggestion_comf, w.alerts.toString());
-				setTextViewString(R.id.w_suggestion_cw, w.alerts.toString());
-				setTextViewString(R.id.w_suggestion_drsg, w.alerts.toString());
-				setTextViewString(R.id.w_suggestion_flu, w.alerts.toString());
-				setTextViewString(R.id.w_suggestion_sport, w.alerts.toString());
-				setTextViewString(R.id.w_suggestion_tarv, w.alerts.toString());
-				setTextViewString(R.id.w_suggestion_uv, w.alerts.toString());
 
-				setTextViewString(R.id.w_suggestion_comf_brf, w.alerts.toString());
-				setTextViewString(R.id.w_suggestion_cw_brf, w.alerts.toString());
-				setTextViewString(R.id.w_suggestion_drsg_brf, w.alerts.toString());
-				setTextViewString(R.id.w_suggestion_flu_brf, w.alerts.toString());
-				setTextViewString(R.id.w_suggestion_sport_brf, w.alerts.toString());
-				setTextViewString(R.id.w_suggestion_tarv_brf, w.alerts.toString());
-				setTextViewString(R.id.w_suggestion_uv_brf, w.alerts.toString());
-			}
+
+//			if (w.alerts != null) {
+//				setTextViewString(R.id.w_suggestion_comf, w.alerts.toString());
+//				setTextViewString(R.id.w_suggestion_cw, w.alerts.toString());
+//				setTextViewString(R.id.w_suggestion_drsg, w.alerts.toString());
+//				setTextViewString(R.id.w_suggestion_flu, w.alerts.toString());
+//				setTextViewString(R.id.w_suggestion_sport, w.alerts.toString());
+//				setTextViewString(R.id.w_suggestion_tarv, w.alerts.toString());
+//				setTextViewString(R.id.w_suggestion_uv, w.alerts.toString());
+//
+//				setTextViewString(R.id.w_suggestion_comf_brf, w.alerts.toString());
+//				setTextViewString(R.id.w_suggestion_cw_brf, w.alerts.toString());
+//				setTextViewString(R.id.w_suggestion_drsg_brf, w.alerts.toString());
+//				setTextViewString(R.id.w_suggestion_flu_brf, w.alerts.toString());
+//				setTextViewString(R.id.w_suggestion_sport_brf, w.alerts.toString());
+//				setTextViewString(R.id.w_suggestion_tarv_brf, w.alerts.toString());
+//				setTextViewString(R.id.w_suggestion_uv_brf, w.alerts.toString());
+//			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
