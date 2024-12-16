@@ -416,6 +416,28 @@ public class MainActivity extends FragmentActivity {
 							forecast7Days.removeAllViews();
 
 							for (int i = 0; i < predictions7Days.length; i++) {
+								// Parse each day's forecast data to find the weather condition with the highest percentage
+								String dayPrediction = predictions7Days[i];
+								String[] conditions = dayPrediction.split("\\s+"); // Split forecast data by space
+
+								// Variables to track the highest percentage and corresponding weather label
+								String highestLabel = "Unknown";
+								double highestPercent = 0;
+
+								// Extract weather condition percentages
+								for (int j = 1; j < conditions.length; j += 5) { // Assuming format: Clouds 81.63% Rain 14.61%
+									try {
+										String label = conditions[j - 1]; // Weather condition (e.g., Clouds)
+										double percent = Double.parseDouble(conditions[j].replace("%", ""));
+
+										if (percent > highestPercent) {
+											highestPercent = percent;
+											highestLabel = label;
+										}
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
+								}
 								// Create a vertical layout for each day's forecast
 								LinearLayout dayLayout = new LinearLayout(this);
 								dayLayout.setOrientation(LinearLayout.HORIZONTAL);
@@ -429,16 +451,24 @@ public class MainActivity extends FragmentActivity {
 								dayLabel.setTextSize(16);
 								dayLabel.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
 
-								// Forecast data
+								// Forecast data with the highest weather condition
 								TextView dayForecast = new TextView(this);
-								dayForecast.setText(predictions7Days[i]);
+								dayForecast.setText(highestLabel + " (" + String.format("%.2f", highestPercent) + "%)");
 								dayForecast.setTextColor(getResources().getColor(R.color.w_text_secondary));
 								dayForecast.setTextSize(16);
-								dayForecast.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 2));
+								dayForecast.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+
+								// Forecast data
+								TextView dayDetailsForecast = new TextView(this);
+								dayDetailsForecast.setText(predictions7Days[i]);
+								dayDetailsForecast.setTextColor(getResources().getColor(R.color.w_text_secondary));
+								dayDetailsForecast.setTextSize(16);
+								dayDetailsForecast.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
 
 								// Add views to the horizontal layout
 								dayLayout.addView(dayLabel);
 								dayLayout.addView(dayForecast);
+								dayLayout.addView(dayDetailsForecast);
 
 								// Add horizontal layout to the parent LinearLayout
 								forecast7Days.addView(dayLayout);
@@ -457,6 +487,28 @@ public class MainActivity extends FragmentActivity {
 							forecast24Hours.removeAllViews();
 
 							for (int i = 0; i < predictions24Hours.length; i++) {
+								String hourPrediction = predictions24Hours[i];
+								String[] conditions = hourPrediction.split("\\s+"); // Split forecast data by space
+
+								// Variables to track the highest percentage and corresponding weather label
+								String highestLabel = "Unknown";
+								double highestPercent = 0;
+
+								// Extract weather condition percentages
+								for (int j = 1; j < conditions.length; j += 5) { // Assuming format: Clouds 81.63% Rain 14.61%
+									try {
+										String label = conditions[j - 1]; // Weather condition (e.g., Clouds)
+										double percent = Double.parseDouble(conditions[j].replace("%", ""));
+
+										if (percent > highestPercent) {
+											highestPercent = percent;
+											highestLabel = label;
+										}
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
+								}
+
 								// Create a horizontal LinearLayout for each hour's forecast
 								LinearLayout hourLayout = new LinearLayout(this);
 								hourLayout.setOrientation(LinearLayout.HORIZONTAL);
@@ -470,15 +522,23 @@ public class MainActivity extends FragmentActivity {
 								hourLabel.setTextSize(16);
 								hourLabel.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
 
+								// Forecast data with the highest weather condition
+								TextView hourDetailsForecast = new TextView(this);
+								hourDetailsForecast.setText(highestLabel + " (" + String.format("%.2f", highestPercent) + "%)");
+								hourDetailsForecast.setTextColor(getResources().getColor(R.color.w_text_secondary));
+								hourDetailsForecast.setTextSize(16);
+								hourDetailsForecast.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+
 								// Forecast data
 								TextView hourForecast = new TextView(this);
 								hourForecast.setText(predictions24Hours[i]);
 								hourForecast.setTextColor(getResources().getColor(R.color.w_text_secondary));
 								hourForecast.setTextSize(16);
-								hourForecast.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 2));
+								hourForecast.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
 
 								// Add views to the horizontal layout
 								hourLayout.addView(hourLabel);
+								hourLayout.addView(hourDetailsForecast);
 								hourLayout.addView(hourForecast);
 
 								// Add horizontal layout to the parent LinearLayout
@@ -496,8 +556,8 @@ public class MainActivity extends FragmentActivity {
 							// Rain Prediction
 							TextView rainPrediction = findViewById(R.id.w_rain_prediction);
 							rainPrediction.setText(willRain
-									? "Rain expected in the next hour.\nRain Percentage: " + willRainPercent + "%"
-									: "No rain expected in the next hour.\nRain Percentage: " + willRainPercent + "%");
+									? "Rain expected in the next hour.\nRain Percentage: " + willRainPercent * 100 + "%"
+									: "No rain expected in the next hour.\nRain Percentage: " + willRainPercent * 100 + "%");
 
 
 						} catch (Exception e) {
