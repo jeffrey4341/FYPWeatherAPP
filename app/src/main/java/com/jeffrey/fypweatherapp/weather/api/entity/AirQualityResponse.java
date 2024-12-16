@@ -2,14 +2,20 @@ package com.jeffrey.fypweatherapp.weather.api.entity;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class AirQualityResponse {
+public class AirQualityResponse implements Serializable {
+
+    private static final long serialVersionUID = 1206164576046726422L;
 
     @SerializedName("list")
     public List<AirQuality> list;
 
-    public static class AirQuality {
+
+    public static class AirQuality implements Serializable {
+
+        private static final long serialVersionUID = 6529685098267757690L;
         @SerializedName("main")
         public Main main;
 
@@ -19,12 +25,17 @@ public class AirQualityResponse {
         @SerializedName("dt")
         public long dt;
 
-        public static class Main {
+        public static class Main implements Serializable {
+
+            private static final long serialVersionUID = 6529685098267757700L;
             @SerializedName("aqi")
             public int aqi;
         }
 
-        public static class Components {
+        public static class Components implements Serializable {
+
+            private static final long serialVersionUID = 6529685098267757710L;
+
             @SerializedName("co")
             public double co;
             @SerializedName("no")

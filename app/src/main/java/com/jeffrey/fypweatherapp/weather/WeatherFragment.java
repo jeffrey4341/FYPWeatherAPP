@@ -34,7 +34,7 @@ import com.jeffrey.fypweatherapp.weather.api.entity.Weather;
 import com.jeffrey.fypweatherapp.weather.api.entity.DailyForecast;
 import com.jeffrey.fypweatherapp.weather.api.entity.HourlyForecast;
 import com.jeffrey.fypweatherapp.weather.api.entity.CurrentWeather;
-import com.jeffrey.fypweatherapp.weather.api.entity.WeatherCondition;
+//import com.jeffrey.fypweatherapp.weather.api.entity.WeatherCondition;
 import com.jeffrey.fypweatherapp.weather.widget.AqiView;
 import com.jeffrey.fypweatherapp.weather.widget.AstroView;
 import com.jeffrey.fypweatherapp.weather.widget.DailyForecastView;

@@ -1,9 +1,13 @@
 package com.jeffrey.fypweatherapp.weather.api.entity;
 
 import com.google.gson.annotations.SerializedName;
+
+import java.io.Serializable;
 import java.util.List;
 
-public class HourlyForecast {
+public class HourlyForecast implements Serializable {
+    private static final long serialVersionUID = 6529685098267757706L;
+
     @SerializedName("dt")
     public long dt;
     @SerializedName("temp")
@@ -27,7 +31,7 @@ public class HourlyForecast {
     @SerializedName("wind_deg")
     public int windDeg;
     @SerializedName("weather")
-    public List<WeatherCondition> weather;
+    public List<CurrentWeather.WeatherCondition> weather;
     @SerializedName("pop")
     public double pop;
 }

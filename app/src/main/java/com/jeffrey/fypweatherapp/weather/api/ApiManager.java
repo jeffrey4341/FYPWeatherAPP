@@ -56,11 +56,11 @@ public class ApiManager {
 	private static StringBuilder WeatherJSON;
 	private static StringBuilder AQIJSON;
 
-	public interface ApiListener {
-		public void onReceiveWeather(Weather weather, boolean updated);
-
-		public void onUpdateError();
-	}
+//	public interface ApiListener {
+//		public void onReceiveWeather(Weather weather, boolean updated);
+//
+//		public void onUpdateError();
+//	}
 	public static Weather fetchWeather(double lat, double lon) {
 		String urlString = ONE_CALL_URL + "?lat=" + lat + "&lon=" + lon + "&units=metric&appid=" + API_KEY;
 		String aqiurlString = AQI_CALL_URL + "?lat=" + lat + "&lon=" + lon + "&appid=" + API_KEY;
@@ -240,13 +240,13 @@ public class ApiManager {
 //		return areas;
 //	}
 
-	public static void updateWeather(@NonNull Context context, @NonNull Double latitude, @NonNull Double longitude, @NonNull ApiListener apiListener) {
-		if (TextUtils.isEmpty(latitude.toString()) || TextUtils.isEmpty(longitude.toString())) {
-			return;
-		}
-		// UiUtil.logDebug(TAG, "updateWeather->" + latitude + longitude);
-
-	}
+//	public static void updateWeather(@NonNull Context context, @NonNull Double latitude, @NonNull Double longitude, @NonNull ApiListener apiListener) {
+//		if (TextUtils.isEmpty(latitude.toString()) || TextUtils.isEmpty(longitude.toString())) {
+//			return;
+//		}
+//		// UiUtil.logDebug(TAG, "updateWeather->" + latitude + longitude);
+//
+//	}
 	/**
 	 * 是否需要更新Weather数据 1小时15分钟之内的return false; 传入null或者有问题的weather也会返回true
 	 *
@@ -547,56 +547,56 @@ public class ApiManager {
 		return false;
 	}
 
-	public static void saveWeatherData(Context context, long lastUpdated) {
-		WeatherDatabaseHelper dbHelper = new WeatherDatabaseHelper(context);
-		SQLiteDatabase db = dbHelper.getWritableDatabase();
+//	public static void saveWeatherData(Context context, long lastUpdated) {
+//		WeatherDatabaseHelper dbHelper = new WeatherDatabaseHelper(context);
+//		SQLiteDatabase db = dbHelper.getWritableDatabase();
+//
+//		// Insert new data
+//		ContentValues values = new ContentValues();
+//		values.put(WeatherDatabaseHelper.COLUMN_OPEN_WEATHER_JSON, String.valueOf(WeatherJSON));
+//		values.put(WeatherDatabaseHelper.COLUMN_AIR_QUALITY_JSON, String.valueOf(AQIJSON));
+//		values.put(WeatherDatabaseHelper.COLUMN_LAST_UPDATED, lastUpdated);
+//
+//		db.insert(WeatherDatabaseHelper.TABLE_WEATHER, null, values);
+//		db.close();
+//	}
 
-		// Insert new data
-		ContentValues values = new ContentValues();
-		values.put(WeatherDatabaseHelper.COLUMN_OPEN_WEATHER_JSON, String.valueOf(WeatherJSON));
-		values.put(WeatherDatabaseHelper.COLUMN_AIR_QUALITY_JSON, String.valueOf(AQIJSON));
-		values.put(WeatherDatabaseHelper.COLUMN_LAST_UPDATED, lastUpdated);
-
-		db.insert(WeatherDatabaseHelper.TABLE_WEATHER, null, values);
-		db.close();
-	}
-
-	public static String[] getLatestWeatherData(Context context) {
-		WeatherDatabaseHelper dbHelper = new WeatherDatabaseHelper(context);
-		SQLiteDatabase db = dbHelper.getReadableDatabase();
-		String openWeatherJson = null;
-		String airQualityJson = null;
-
-		Cursor cursor = db.query(WeatherDatabaseHelper.TABLE_WEATHER,
-				new String[]{WeatherDatabaseHelper.COLUMN_OPEN_WEATHER_JSON, WeatherDatabaseHelper.COLUMN_AIR_QUALITY_JSON},
-				null, null, null, null,
-				WeatherDatabaseHelper.COLUMN_LAST_UPDATED + " DESC", "1"); // Sort by timestamp and limit to 1 row
-
-		if (cursor != null && cursor.moveToFirst()) {
-			int openWeatherIndex = cursor.getColumnIndex(WeatherDatabaseHelper.COLUMN_OPEN_WEATHER_JSON);
-			int airQualityIndex = cursor.getColumnIndex(WeatherDatabaseHelper.COLUMN_AIR_QUALITY_JSON);
-
-			if (openWeatherIndex >= 0) {
-				byte[] openWeatherBlob = cursor.getBlob(openWeatherIndex);
-				openWeatherJson = new String(openWeatherBlob, StandardCharsets.UTF_8);
-			} else {
-				Log.e("Database", "COLUMN_OPEN_WEATHER_JSON not found");
-			}
-
-			if (airQualityIndex >= 0) {
-				byte[] airQualityBlob = cursor.getBlob(airQualityIndex);
-				airQualityJson = new String(airQualityBlob, StandardCharsets.UTF_8);
-			} else {
-				Log.e("Database", "COLUMN_AIR_QUALITY_JSON not found");
-			}
-			cursor.close();
-		}
-		else {
-			return null;
-		}
-		db.close();
-		return new String[]{openWeatherJson, airQualityJson};
-	}
+//	public static String[] getLatestWeatherData(Context context) {
+//		WeatherDatabaseHelper dbHelper = new WeatherDatabaseHelper(context);
+//		SQLiteDatabase db = dbHelper.getReadableDatabase();
+//		String openWeatherJson = null;
+//		String airQualityJson = null;
+//
+//		Cursor cursor = db.query(WeatherDatabaseHelper.TABLE_WEATHER,
+//				new String[]{WeatherDatabaseHelper.COLUMN_OPEN_WEATHER_JSON, WeatherDatabaseHelper.COLUMN_AIR_QUALITY_JSON},
+//				null, null, null, null,
+//				WeatherDatabaseHelper.COLUMN_LAST_UPDATED + " DESC", "1"); // Sort by timestamp and limit to 1 row
+//
+//		if (cursor != null && cursor.moveToFirst()) {
+//			int openWeatherIndex = cursor.getColumnIndex(WeatherDatabaseHelper.COLUMN_OPEN_WEATHER_JSON);
+//			int airQualityIndex = cursor.getColumnIndex(WeatherDatabaseHelper.COLUMN_AIR_QUALITY_JSON);
+//
+//			if (openWeatherIndex >= 0) {
+//				byte[] openWeatherBlob = cursor.getBlob(openWeatherIndex);
+//				openWeatherJson = new String(openWeatherBlob, StandardCharsets.UTF_8);
+//			} else {
+//				Log.e("Database", "COLUMN_OPEN_WEATHER_JSON not found");
+//			}
+//
+//			if (airQualityIndex >= 0) {
+//				byte[] airQualityBlob = cursor.getBlob(airQualityIndex);
+//				airQualityJson = new String(airQualityBlob, StandardCharsets.UTF_8);
+//			} else {
+//				Log.e("Database", "COLUMN_AIR_QUALITY_JSON not found");
+//			}
+//			cursor.close();
+//		}
+//		else {
+//			return null;
+//		}
+//		db.close();
+//		return new String[]{openWeatherJson, airQualityJson};
+//	}
 
 
 

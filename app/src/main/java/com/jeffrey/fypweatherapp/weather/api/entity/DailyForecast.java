@@ -37,7 +37,7 @@ public class DailyForecast implements Serializable {
     @SerializedName("wind_deg")
     public int windDeg;
     @SerializedName("weather")
-    public List<WeatherCondition> weather;
+    public List<CurrentWeather.WeatherCondition> weather;
     @SerializedName("clouds")
     public int clouds;
     @SerializedName("pop")

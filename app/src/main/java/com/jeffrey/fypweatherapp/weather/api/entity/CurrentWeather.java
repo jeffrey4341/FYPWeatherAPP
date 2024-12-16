@@ -2,9 +2,12 @@ package com.jeffrey.fypweatherapp.weather.api.entity;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class CurrentWeather {
+public class CurrentWeather implements Serializable {
+    private static final long serialVersionUID = 6529685098267757692L;
+
     @SerializedName("dt")
     public long dt;
     @SerializedName("sunrise")
@@ -39,4 +42,30 @@ public class CurrentWeather {
 
     @SerializedName("weather")
     public List<WeatherCondition> weather;
+
+
+    // Nested class Rain
+    public static class Rain implements Serializable {
+        private static final long serialVersionUID = 6529685098267757702L;
+
+        @SerializedName("1h")
+        public double hour;
+    }
+
+    // Nested class WeatherCondition
+    public static class WeatherCondition implements Serializable {
+        private static final long serialVersionUID = 6529685098267757703L;
+
+        @SerializedName("id")
+        public int id;
+
+        @SerializedName("main")
+        public String main;
+
+        @SerializedName("description")
+        public String description;
+
+        @SerializedName("icon")
+        public String icon;
+    }
 }
