@@ -5,9 +5,11 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -378,6 +380,93 @@ public class WeatherFragment extends BaseFragment {
 			mHourlyForecastView.setData(mWeather);
 			mAqiView.setData(mWeather.AirQualityResponse);
 			mAstroView.setData(mWeather);
+
+			final int conditionCode = mWeather.OpenWeatherJSON.current.weather.get(0).id;
+
+			// Group 2xx: Thunderstorm
+			if (conditionCode >= 200 && conditionCode <= 232) {
+				mRootView.findViewById(R.id.w_weather_icon)
+						.setForeground(ContextCompat.getDrawable(getContext(), R.drawable.cond_icon_thundershower));
+			}
+
+			// Group 3xx: Drizzle
+			if (conditionCode >= 300 && conditionCode <= 321) {
+				mRootView.findViewById(R.id.w_weather_icon)
+						.setForeground(ContextCompat.getDrawable(getContext(), R.drawable.cond_icon_icerain));
+			}
+
+			// Group 5xx: Rain
+			if (conditionCode >= 500 && conditionCode <= 531) {
+				mRootView.findViewById(R.id.w_weather_icon)
+						.setForeground(ContextCompat.getDrawable(getContext(), R.drawable.cond_icon_moderaterain));
+			}
+
+			// Group 6xx: Snow
+			if (conditionCode >= 600 && conditionCode <= 622) {
+				mRootView.findViewById(R.id.w_weather_icon)
+						.setForeground(ContextCompat.getDrawable(getContext(), R.drawable.cond_icon_lightsnow));
+			}
+
+			// Group 7xx: Atmosphere (e.g., mist, smoke, haze, dust)
+			if (conditionCode == 701) { // Mist
+				mRootView.findViewById(R.id.w_weather_icon)
+						.setForeground(ContextCompat.getDrawable(getContext(), R.drawable.cond_icon_na));
+			} else if (conditionCode == 711) { // Smoke
+				mRootView.findViewById(R.id.w_weather_icon)
+						.setForeground(ContextCompat.getDrawable(getContext(), R.drawable.cond_icon_haze));
+			} else if (conditionCode == 721) { // Haze
+				mRootView.findViewById(R.id.w_weather_icon)
+						.setForeground(ContextCompat.getDrawable(getContext(), R.drawable.cond_icon_haze));
+			} else if (conditionCode == 731) { // Sand/dust whirls
+				mRootView.findViewById(R.id.w_weather_icon)
+						.setForeground(ContextCompat.getDrawable(getContext(), R.drawable.cond_icon_sand));
+			} else if (conditionCode == 741) { // Fog
+				mRootView.findViewById(R.id.w_weather_icon)
+						.setForeground(ContextCompat.getDrawable(getContext(), R.drawable.cond_icon_foggy));
+			} else if (conditionCode == 751) { // Sand
+				mRootView.findViewById(R.id.w_weather_icon)
+						.setForeground(ContextCompat.getDrawable(getContext(), R.drawable.cond_icon_sand));
+			} else if (conditionCode == 761) { // Dust
+				mRootView.findViewById(R.id.w_weather_icon)
+						.setForeground(ContextCompat.getDrawable(getContext(), R.drawable.cond_icon_sand));
+			} else if (conditionCode == 762) { // Volcanic ash
+				mRootView.findViewById(R.id.w_weather_icon)
+						.setForeground(ContextCompat.getDrawable(getContext(), R.drawable.cond_icon_na));
+			} else if (conditionCode == 771) { // Squalls
+				mRootView.findViewById(R.id.w_weather_icon)
+						.setForeground(ContextCompat.getDrawable(getContext(), R.drawable.cond_icon_overcast));
+			} else if (conditionCode == 781) { // Tornado
+				mRootView.findViewById(R.id.w_weather_icon)
+						.setForeground(ContextCompat.getDrawable(getContext(), R.drawable.cond_icon_na));
+			}
+
+
+			// Group 800: Clear
+			if (conditionCode == 800) {
+				if (ApiManager.isNight(mWeather)) {
+					mRootView.findViewById(R.id.w_weather_icon)
+							.setForeground(ContextCompat.getDrawable(getContext(), R.drawable.cond_icon_sun_night));
+				} else {
+					mRootView.findViewById(R.id.w_weather_icon)
+							.setForeground(ContextCompat.getDrawable(getContext(), R.drawable.cond_icon_sun));
+				}
+			}
+
+			// Group 80x: Clouds
+			if (conditionCode >= 801 && conditionCode <= 804) {
+				if (conditionCode == 801) { // Few clouds
+					if (ApiManager.isNight(mWeather)) {
+						mRootView.findViewById(R.id.w_weather_icon)
+								.setForeground(ContextCompat.getDrawable(getContext(), R.drawable.cond_icon_cloudy_night));
+					} else {
+						mRootView.findViewById(R.id.w_weather_icon)
+								.setForeground(ContextCompat.getDrawable(getContext(), R.drawable.cond_icon_cloudy));
+					}
+				} else { // Overcast clouds (804)
+					mRootView.findViewById(R.id.w_weather_icon)
+							.setForeground(ContextCompat.getDrawable(getContext(), R.drawable.cond_icon_overcast));
+				}
+			}
 
 			final String tmp = String.valueOf(w.current.temp);
 			try {

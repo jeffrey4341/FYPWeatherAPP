@@ -22,7 +22,15 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="520dp"
-                android:orientation="vertical" >
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/w_weather_icon"
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:layout_marginTop="56dp"
+                    android:layout_toStartOf="@id/w_now_tmp_minus" />
+
                 <com.jeffrey.fypweatherapp.weather.widget.FontTextView
                     android:id="@+id/w_now_tmp_minus"
                     android:layout_width="wrap_content"
@@ -30,9 +38,9 @@
                     android:layout_marginTop="56dp"
                     android:layout_toLeftOf="@+id/w_now_tmp"
                     android:text="-"
-                    android:visibility="gone"
                     android:textColor="@color/mxx_text_primary"
-                    android:textSize="72dp" />
+                    android:textSize="72dp"
+                    android:visibility="gone" />
 
                 <com.jeffrey.fypweatherapp.weather.widget.FontTextView
                     android:id="@+id/w_now_tmp"
@@ -80,10 +88,10 @@
                     android:id="@+id/w_basic_update_loc"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
                     android:layout_alignParentRight="true"
-                    android:layout_marginBottom="228dp"
+                    android:layout_alignParentBottom="true"
                     android:layout_marginRight="8dp"
+                    android:layout_marginBottom="228dp"
                     android:text=""
                     android:textColor="@color/w_text_secondary"
                     android:textSize="12dp" />

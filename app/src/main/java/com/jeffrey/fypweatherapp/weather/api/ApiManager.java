@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
@@ -17,6 +18,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
+import com.jeffrey.fypweatherapp.R;
 import com.jeffrey.fypweatherapp.database.WeatherDatabaseHelper;
 import com.jeffrey.fypweatherapp.dynamicweathertype.BaseDrawer;
 import com.jeffrey.fypweatherapp.dynamicweathertype.BaseDrawer.Type;
