@@ -38,6 +38,8 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.gson.Gson;
 import com.jeffrey.fypweatherapp.R;
 import com.jeffrey.fypweatherapp.dynamicweathertype.DynamicWeatherView;
@@ -97,45 +99,57 @@ public class MainActivity extends FragmentActivity {
 			typeface = Typeface.createFromAsset(getAssets(), "fonts/mxx_font2.ttf");
 		}
 		logger.addSplit("Typeface.createFromAsset");
-		setContentView(R.layout.activity_main);
-		fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-		if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-				!= PackageManager.PERMISSION_GRANTED) {
-			ActivityCompat.requestPermissions(this,
-					new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_CODE);
+		setContentView(R.layout.activity_login);
+		FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+		FirebaseUser user = firebaseAuth.getCurrentUser();
+		if (user == null) {
+			startActivity(new Intent(this, LoginActivity.class));
+			finish();
 		} else {
-			getLastLocation();
-		}
-		logger.addSplit("setContentView");
-		viewPager = (ViewPager) findViewById(R.id.main_viewpager);
-		if (Build.VERSION.SDK_INT >= 19) {
-			viewPager.setPadding(0, UiUtil.getStatusBarHeight(), 0, 0);
-		}
-		AlphaAnimation alphaAnimation = new AlphaAnimation(0f, 1f);
-		alphaAnimation.setDuration(260);
-		alphaAnimation.setAnimationListener(new AnimationListener() {
-			@Override
-			public void onAnimationStart(Animation animation) {
-				getWindow().setBackgroundDrawable(//getResources().getDrawable(R.drawable.window_frame_color));
-						new ColorDrawable(Color.BLACK));
+			Toast.makeText(this, "Welcome, " + user.getEmail(), Toast.LENGTH_SHORT).show();
+			setContentView(R.layout.activity_main);
+			fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+			if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+					!= PackageManager.PERMISSION_GRANTED) {
+				ActivityCompat.requestPermissions(this,
+						new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_CODE);
+			} else {
+				getLastLocation();
+			}
+			logger.addSplit("setContentView");
+			viewPager = (ViewPager) findViewById(R.id.main_viewpager);
+			if (Build.VERSION.SDK_INT >= 19) {
+				viewPager.setPadding(0, UiUtil.getStatusBarHeight(), 0, 0);
+			}
+			AlphaAnimation alphaAnimation = new AlphaAnimation(0f, 1f);
+			alphaAnimation.setDuration(260);
+			alphaAnimation.setAnimationListener(new AnimationListener() {
+				@Override
+				public void onAnimationStart(Animation animation) {
+					getWindow().setBackgroundDrawable(//getResources().getDrawable(R.drawable.window_frame_color));
+							new ColorDrawable(Color.BLACK));
 //				WeatherNotificationService.startServiceWithNothing(MainActivity.this);
-			}
+				}
 
-			@Override
-			public void onAnimationRepeat(Animation animation) {
-			}
+				@Override
+				public void onAnimationRepeat(Animation animation) {
+				}
 
-			@Override
-			public void onAnimationEnd(Animation animation) {
-			}
-		});
-		viewPager.setAnimation(alphaAnimation);
-//		viewPager.setPageMargin(UiUtil.dp2px(this, 4));
-		logger.addSplit("findViewPager");
-		weatherView = findViewById(R.id.main_dynamicweatherview);
-		logger.addSplit("findWeatherView");
-		logger.addSplit("loadAreaToViewPager");
-		logger.dumpToLog();
+				@Override
+				public void onAnimationEnd(Animation animation) {
+				}
+			});
+			viewPager.setAnimation(alphaAnimation);
+//			viewPager.setPageMargin(UiUtil.dp2px(this, 4));
+			logger.addSplit("findViewPager");
+			weatherView = findViewById(R.id.main_dynamicweatherview);
+			logger.addSplit("findWeatherView");
+			logger.dumpToLog();
+
+		}
+
+
+
 
 
 	}
@@ -645,7 +659,9 @@ public class MainActivity extends FragmentActivity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		weatherView.onDestroy();
+		if (weatherView != null) {
+			weatherView.onDestroy();
+		}
 	}
 
 	public static class SimpleFragmentPagerAdapter extends FragmentPagerAdapter {
@@ -701,6 +717,20 @@ public class MainActivity extends FragmentActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
+//	@Override
+//	public void onBackPressed() {
+//		super.onBackPressed();
+//		new AlertDialog.Builder(this)
+//				.setTitle("Exit App")
+//				.setMessage("Are you sure you want to exit?")
+//				.setPositiveButton("Yes", (dialog, which) -> {
+//					finishAffinity();
+//					System.exit(0);
+//				})
+//				.setNegativeButton("No", null)
+//				.show();
+//	}
+
 	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
 										   @NonNull int[] grantResults) {
 		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -733,7 +763,6 @@ public class MainActivity extends FragmentActivity {
 					// Set default behavior if permissions are not granted
 					LocationManager.getInstance().setLatitude(0.0);
 					LocationManager.getInstance().setLongitude(0.0);
-					loadAreaToViewPager(); // Load ViewPager with default location
 				})
 				.create()
 				.show();

@@ -11,7 +11,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.jeffrey.fypweatherapp.R;
 import com.jeffrey.fypweatherapp.dynamicweathertype.BaseDrawer.Type;
 import com.jeffrey.fypweatherapp.widget.support.LabelSpinner;
@@ -65,11 +67,25 @@ public class SettingsFragment extends BaseFragment {
 			mRootView.findViewById(R.id.settings_github).setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					final String url = "https://github.com/Mixiaoxiao/Weather";
+					final String url = "https://github.com/jeffrey4341/FYPWeatherAPP";
 					Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
 					context.startActivity(Intent.createChooser(intent, url));
 				}
 			});
+
+			// Handle logout button
+			mRootView.findViewById(R.id.settings_logout).setOnClickListener(v -> {
+				// Perform logout
+				FirebaseAuth.getInstance().signOut();
+
+				// Redirect to Login Activity
+				Intent intent = new Intent(context, LoginActivity.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+				startActivity(intent);
+				Toast.makeText(context, "Logged out successfully", Toast.LENGTH_SHORT).show();
+			});
+
+
 			SmoothSwitch switchNotification = (SmoothSwitch) mRootView.findViewById(R.id.settings_switch_notification);
 			final LabelSpinner smallIconSpinner = (LabelSpinner) mRootView.findViewById(R.id.settings_spinner_smallicon);
 			final LabelSpinner textColorSpinner = (LabelSpinner) mRootView.findViewById(R.id.settings_spinner_textcolor);
