@@ -316,6 +316,10 @@ public class MainActivity extends FragmentActivity {
 
 				// Fetch weather data
 				Weather weather = ApiManager.fetchWeather(latitude, longitude);
+
+				String cityName = weather.getOpenWeatherJSON().timezone;
+
+				LocationManager.getInstance().setCityname(cityName);
 //				AirQualityResponse airQuality = ApiManager.fetchAirQuality(latitude, longitude);
 
 				// Create and add the WeatherFragment on the main thread

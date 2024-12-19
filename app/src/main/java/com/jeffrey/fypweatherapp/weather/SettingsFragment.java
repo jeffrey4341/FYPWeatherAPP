@@ -1,9 +1,9 @@
 package com.jeffrey.fypweatherapp.weather;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -13,9 +13,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewSwitcher;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -24,17 +28,27 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.jeffrey.fypweatherapp.R;
+import com.jeffrey.fypweatherapp.dslv.DragSortListView;
 import com.jeffrey.fypweatherapp.dynamicweathertype.BaseDrawer.Type;
+import com.jeffrey.fypweatherapp.util.LocationAdapter;
+import com.jeffrey.fypweatherapp.util.LocationManager;
 import com.jeffrey.fypweatherapp.widget.support.LabelSpinner;
 import com.jeffrey.fypweatherapp.widget.support.SmoothSwitch;
-import com.jeffrey.fypweatherapp.weather.api.ApiManager;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class SettingsFragment extends BaseFragment {
 	private View mRootView;
+
+	//private View dialogView;
 	private TextView mGpsTextView;
 //	private ArrayList<Area> mSelectedAreas;// = new
 											// ArrayList<ApiManager.Area>();
@@ -46,6 +60,8 @@ public class SettingsFragment extends BaseFragment {
 	private TextView loginLogoutTextView;
 	private FirebaseAuth mAuth;
 	private GoogleSignInClient googleSignInClient;
+	private List<String> documentIds = new ArrayList<>();
+	private List<String> originalLocations = new ArrayList<>();
 
 	public static SettingsFragment makeInstance() {
 		SettingsFragment fragment = new SettingsFragment();
@@ -147,6 +163,17 @@ public class SettingsFragment extends BaseFragment {
 		return mRootView;
 	}
 
+	@Override
+	public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+		super.onViewCreated(view, savedInstanceState);
+
+		// Reference to the Manage Area button
+		TextView manageAreaButton = view.findViewById(R.id.settings_manage_area);
+
+		// Set click listener to show the Manage Area dialog
+		manageAreaButton.setOnClickListener(v -> showManageAreaDialog());
+	}
+
 	private void signIn() {
 		Intent signInIntent = googleSignInClient.getSignInIntent();
 		startActivityForResult(signInIntent, RC_SIGN_IN);
@@ -180,7 +207,7 @@ public class SettingsFragment extends BaseFragment {
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
 		startActivity(intent);
 		requireActivity().finish(); // Finish the current activity
-		//System.exit(0); // Optional: Forcefully close the app process
+		System.exit(0); // Optional: Forcefully close the app process
 	}
 
 	private void updateLoginStatus() {
@@ -199,12 +226,222 @@ public class SettingsFragment extends BaseFragment {
 		mRootView.findViewById(R.id.settings_manage_area).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				
+				if (mAuth.getCurrentUser() != null) {
+					showManageAreaDialog();
+				} else {
+					Toast.makeText(getContext(), "Please login to manage locations.", Toast.LENGTH_SHORT).show();
+				}
 			}
 		});
 		mGpsTextView = (TextView) mRootView.findViewById(R.id.settings_gps_location);
 		
 	}
+
+	// Show Manage Area Dialog
+	private void showManageAreaDialog() {
+		// Inflate the dialog layout
+		AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+		View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_manage_area, null);
+		builder.setView(dialogView);
+
+		AlertDialog alertDialog = builder.create();
+
+		// Initialize ViewSwitcher and Buttons
+		ViewSwitcher viewSwitcher = dialogView.findViewById(R.id.manage_areas_viewswitcher);
+		Button addButton = dialogView.findViewById(R.id.manage_areas_add);
+		Button cancelButton = dialogView.findViewById(R.id.manage_areas_cancle_button);
+		Button saveButton = dialogView.findViewById(R.id.manage_areas_ok_button);
+		Button returnButton = dialogView.findViewById(R.id.manage_areas_return_button);
+		Button deleteButton = viewSwitcher.findViewById(R.id.listitem_manage_area_delete_button);
+		EditText searchEditText = dialogView.findViewById(R.id.manage_areas_search_edittext);
+		ListView searchListView = dialogView.findViewById(R.id.manage_areas_search_listview);
+		DragSortListView dragSortListView = dialogView.findViewById(R.id.manage_areas_dragSortListView);
+
+		// Adapter to manage locations
+		List<String> locations = new ArrayList<>();
+		List<String> documentIds = new ArrayList<>(); // Document IDs from Firestore
+		LocationAdapter adapter = new LocationAdapter(requireContext(), locations, documentIds);
+		dragSortListView.setAdapter(adapter);
+
+		// Load saved locations into the list
+		loadSavedLocations(dragSortListView, adapter);
+
+//		// Retrofit setup
+//		Retrofit retrofit = new Retrofit.Builder()
+//				.baseUrl("https://maps.googleapis.com/maps/api/")
+//				.addConverterFactory(ocConverterFactory.create())
+//				.build();
+//		ApiManager.GeocodingApiService apiService = retrofit.create(ApiManager.GeocodingApiService.class);
+
+		// Add Button: Switch to the search layout
+		addButton.setOnClickListener(v -> {
+			if (viewSwitcher.getDisplayedChild() == 0) {
+				viewSwitcher.showNext(); // Show the search layout
+			}
+		});
+
+		// Return Button: Switch back to the main layout
+		returnButton.setOnClickListener(v -> {
+			if (viewSwitcher.getDisplayedChild() == 1) {
+				viewSwitcher.showPrevious(); // Show the main layout
+			}
+		});
+
+		// Cancel Button: Close the dialog
+		cancelButton.setOnClickListener(v -> {
+			alertDialog.dismiss(); // Use the AlertDialog reference to dismiss
+		});
+
+		// Save Button: Save changes (placeholder logic)
+		saveButton.setOnClickListener(v -> {
+			FirebaseFirestore db = FirebaseFirestore.getInstance();
+			String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+			List<String> locationsToDelete = adapter.getLocationsToDelete();
+			// Save updated locations
+			String locationName = LocationManager.getInstance().getCityname();
+			double latitude = LocationManager.getInstance().getLatitude();
+			double longitude = LocationManager.getInstance().getLongitude();
+
+			// Iterate over the list of locations to delete
+			for (int i = 0; i < locationsToDelete.size(); i++) {
+				String locationId = locationsToDelete.get(i);
+
+				// Reference to the specific document in Firestore
+				DocumentReference locationRef = db.collection("users")
+						.document(userId)
+						.collection("locations")
+						.document(locationId);
+
+				// Check if the current location already exists in Firestore
+				locationRef.get().addOnSuccessListener(documentSnapshot -> {
+					if (documentSnapshot.exists()) {
+						String existingLocationName = documentSnapshot.getString("name");
+
+						// If the location does not match the current one, save it to Firebase
+						if (!locationName.equals(existingLocationName)) {
+							saveLocationToFirebase(locationName, latitude, longitude);
+						}
+					} else {
+						// Save the location if the document does not exist
+						saveLocationToFirebase(locationName, latitude, longitude);
+					}
+				}).addOnFailureListener(e -> {
+					Log.e("SettingsFragment", "Error checking location: " + locationId, e);
+				});
+			}
+
+			// Delete marked locations
+			for (String docId : locationsToDelete) {
+				db.collection("users")
+						.document(userId)
+						.collection("locations")
+						.document(docId)
+						.delete()
+						.addOnSuccessListener(aVoid -> Log.d("SettingsFragment", "Deleted location: " + docId))
+						.addOnFailureListener(e -> Log.e("SettingsFragment", "Error deleting location", e));
+			}
+
+			Toast.makeText(requireContext(), "Changes saved!", Toast.LENGTH_SHORT).show();
+			alertDialog.dismiss(); // Close the dialog
+		});
+
+
+//		// Add TextWatcher to fetch search results
+//		searchEditText.addTextChangedListener(new TextWatcher() {
+//			@Override
+//			public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+//
+//			@Override
+//			public void onTextChanged(CharSequence s, int start, int before, int count) {
+//				if (s.length() > 2) {
+//					fetchGeocodingResults(apiService, s.toString(), searchResults, adapter);
+//				}
+//			}
+//
+//			@Override
+//			public void afterTextChanged(Editable s) {}
+//		});
+
+		// Show the dialog
+		alertDialog.show();
+	}
+
+//	private void fetchGeocodingResults(ApiManager.GeocodingApiService apiService, String query, List<String> searchResults, ArrayAdapter<String> adapter) {
+//		Call<ApiManager.GeocodingResponse> call = apiService.getGeocodingResults(query, "YOUR_API_KEY");
+//		call.enqueue(new Callback<ApiManager.GeocodingResponse>() {
+//			@Override
+//			public void onResponse(Call<ApiManager.GeocodingResponse> call, Response<ApiManager.GeocodingResponse> response) {
+//				if (response.isSuccessful() && response.body() != null) {
+//					searchResults.clear();
+//					for (ApiManager.GeocodingResult result : response.body().getResults()) {
+//						searchResults.add(result.getFormattedAddress());
+//					}
+//					adapter.notifyDataSetChanged(); // Update ListView
+//				}
+//			}
+//
+//			@Override
+//			public void onFailure(Call<ApiManager.GeocodingResponse> call, Throwable t) {
+//				Toast.makeText(requireContext(), "Failed to fetch results", Toast.LENGTH_SHORT).show();
+//			}
+//
+//		});
+//	}
+
+	// Save Location to Firebase
+	private void saveLocationToFirebase(String locationName, double latitude, double longitude) {
+		String userId = mAuth.getCurrentUser().getUid();
+		FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+		// Prepare Data
+		Map<String, Object> locationData = new HashMap<>();
+		locationData.put("name", locationName);
+		locationData.put("latitude", latitude);
+		locationData.put("longitude", longitude);
+
+		db.collection("users")
+				.document(userId)
+				.collection("locations")
+				.add(locationData)
+				.addOnSuccessListener(documentReference -> {
+					Toast.makeText(getContext(), "Location saved successfully!", Toast.LENGTH_SHORT).show();
+					// Optionally reload locations
+				})
+				.addOnFailureListener(e -> {
+					Log.e("SettingsFragment", "Error saving location", e);
+					Toast.makeText(getContext(), "Failed to save location.", Toast.LENGTH_SHORT).show();
+				});
+	}
+
+	// Load Saved Locations
+	private void loadSavedLocations(DragSortListView dragSortListView, LocationAdapter adapter) {
+		String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+		FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+		db.collection("users")
+				.document(userId)
+				.collection("locations")
+				.get()
+				.addOnSuccessListener(queryDocumentSnapshots -> {
+					List<String> locations = new ArrayList<>();
+					List<String> documentIds = new ArrayList<>();
+
+					for (DocumentSnapshot document : queryDocumentSnapshots) {
+						locations.add(document.getString("name"));
+						documentIds.add(document.getId());
+					}
+
+					adapter.updateData(locations, documentIds); // Update adapter data
+				})
+				.addOnFailureListener(e -> {
+					Log.e("SettingsFragment", "Error loading locations", e);
+					Toast.makeText(requireContext(), "Failed to load locations.", Toast.LENGTH_SHORT).show();
+				});
+	}
+
+
+
+
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -248,8 +485,6 @@ public class SettingsFragment extends BaseFragment {
 	}
 	
 }
-
-
 
 
 

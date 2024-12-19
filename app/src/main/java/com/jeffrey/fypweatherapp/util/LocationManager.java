@@ -5,8 +5,9 @@ public class LocationManager {
     private static LocationManager instance;
     private double latitude;
     private double longitude;
+    private String cityname;
 
-    private LocationManager() { }
+
 
     public static synchronized LocationManager getInstance() {
         if (instance == null) {
@@ -29,6 +30,14 @@ public class LocationManager {
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
+    }
+
+    public String getCityname() {
+        return cityname;
+    }
+
+    public void setCityname(String cityname) {
+        this.cityname = cityname;
     }
 }
 

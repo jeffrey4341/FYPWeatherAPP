@@ -44,6 +44,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.Query;
 
 public class ApiManager {
 
@@ -548,6 +553,34 @@ public class ApiManager {
 		Log.d("isNight", "Default return false.");
 		return false;
 	}
+
+//	public interface GeocodingApiService {
+//		@GET("geocode/json")
+//		Call<GeocodingResponse> getGeocodingResults(
+//				@Query("address") String address,
+//				@Query("key") String apiKey
+//		);
+//	}
+//
+//
+//	public class GeocodingResponse {
+//		@SerializedName("results")
+//		private List<GeocodingResult> results;
+//
+//		public List<GeocodingResult> getResults() {
+//			return results;
+//		}
+//	}
+//
+//	public class GeocodingResult {
+//		@SerializedName("formatted_address")
+//		private String formattedAddress;
+//
+//		public String getFormattedAddress() {
+//			return formattedAddress;
+//		}
+//	}
+
 
 //	public static void saveWeatherData(Context context, long lastUpdated) {
 //		WeatherDatabaseHelper dbHelper = new WeatherDatabaseHelper(context);
