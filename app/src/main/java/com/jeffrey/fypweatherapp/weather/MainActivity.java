@@ -266,20 +266,14 @@ public class MainActivity extends FragmentActivity {
 		return inputData;
 	}
 
-
-
-
 	public void getLastLocation() {
-		if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-			// TODO: Consider calling
-			//    ActivityCompat#requestPermissions
-			// here to request the missing permissions, and then overriding
-			//   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-			//                                          int[] grantResults)
-			// to handle the case where the user grants the permission. See the documentation
-			// for ActivityCompat#requestPermissions for more details.
-			return;
+		if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+			Log.e("MainActivity", "Location permission not granted. Requesting permission...");
+			// Request permissions here if not already requested
+			ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_CODE);
+			return; // Exit the method to avoid further execution
 		}
+
 		fusedLocationClient.getLastLocation()
 				.addOnCompleteListener(new OnCompleteListener<Location>() {
 					@Override
@@ -288,13 +282,15 @@ public class MainActivity extends FragmentActivity {
 							Location location = task.getResult();
 							double latitude = location.getLatitude();
 							double longitude = location.getLongitude();
-							LocationManager.getInstance().setLatitude(location.getLatitude());
-							LocationManager.getInstance().setLongitude(location.getLongitude());
+							LocationManager.getInstance().setLatitude(latitude);
+							LocationManager.getInstance().setLongitude(longitude);
 							Toast.makeText(MainActivity.this,
 									"Lat: " + latitude + ", Lon: " + longitude,
 									Toast.LENGTH_LONG).show();
 							loadAreaToViewPager();
 						} else {
+							// Handle case where location is null
+							Log.e("MainActivity", "Failed to get location.");
 							Toast.makeText(MainActivity.this,
 									"Unable to get location. Ensure location is enabled on the device.",
 									Toast.LENGTH_LONG).show();
@@ -302,8 +298,8 @@ public class MainActivity extends FragmentActivity {
 						}
 					}
 				});
-
 	}
+
 
 	public void loadAreaToViewPager(){
 //		final ArrayList<ApiManager.Area> selectedAreas = ApiManager.loadSelectedArea(this);
@@ -701,22 +697,19 @@ public class MainActivity extends FragmentActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-										   @NonNull int[] grantResults) {
+	@Override
+	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-		if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-				!= PackageManager.PERMISSION_GRANTED) {
-			ActivityCompat.requestPermissions(this,
-					new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_CODE);
-			getLastLocation();
-		} else {
-			Log.e("MainActivity", "Location permission denied. Using default location.");
-			LocationManager.getInstance().setLatitude(0.0);
-			LocationManager.getInstance().setLongitude(0.0);
-			// Permission denied, inform the user and provide fallback
-			Toast.makeText(this, "Location permission is required for weather updates.", Toast.LENGTH_LONG).show();
-			// Optionally, re-request permissions or load a default ViewPager
-			showPermissionRationaleDialog();
+		if (requestCode == LOCATION_REQUEST_CODE) {
+			if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+				// Permission granted
+				getLastLocation();
+			} else {
+				// Permission denied, show rationale or fallback
+				Log.e("MainActivity", "Location permission denied. Using default location.");
+				Toast.makeText(this, "Location permission is required for weather updates.", Toast.LENGTH_LONG).show();
+				showPermissionRationaleDialog();
+			}
 		}
 	}
 
@@ -730,10 +723,10 @@ public class MainActivity extends FragmentActivity {
 						LOCATION_REQUEST_CODE))
 				.setNegativeButton("Cancel", (dialog, which) -> {
 					dialog.dismiss();
-					// Set default behavior if permissions are not granted
-					LocationManager.getInstance().setLatitude(0.0);
-					LocationManager.getInstance().setLongitude(0.0);
-					loadAreaToViewPager(); // Load ViewPager with default location
+					// Fallback to a default location if permission is not granted
+					LocationManager.getInstance().setLatitude(0.0); // Default latitude
+					LocationManager.getInstance().setLongitude(0.0); // Default longitude
+					loadAreaToViewPager(); // Load the application with default settings
 				})
 				.create()
 				.show();
