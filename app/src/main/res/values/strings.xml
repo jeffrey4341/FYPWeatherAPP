@@ -24,6 +24,8 @@
         <item>白色</item>
         <item>黑色</item>
     </string-array>
+
+    <string name="default_web_client_id">312650560177-pk3f3piuu40i03imdg66i93399s0ftuj.apps.googleusercontent.com</string>
     
     <!-- <TextClock
             android:layout_toRightOf="@id/notification_temprature"

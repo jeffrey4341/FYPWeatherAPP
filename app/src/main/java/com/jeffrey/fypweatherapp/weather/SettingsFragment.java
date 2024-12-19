@@ -1,23 +1,34 @@
 package com.jeffrey.fypweatherapp.weather;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.GoogleAuthProvider;
 import com.jeffrey.fypweatherapp.R;
 import com.jeffrey.fypweatherapp.dynamicweathertype.BaseDrawer.Type;
 import com.jeffrey.fypweatherapp.widget.support.LabelSpinner;
 import com.jeffrey.fypweatherapp.widget.support.SmoothSwitch;
 import com.jeffrey.fypweatherapp.weather.api.ApiManager;
-//import com.jeffrey.fypweatherapp.weather.api.ApiManager.Area;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -30,6 +41,11 @@ public class SettingsFragment extends BaseFragment {
 	private Type type = Type.DEFAULT;
 
 //	private static final String BUNDLE_EXTRA_SELECTED_AREAS = "BUNDLE_EXTRA_SELECTED_AREAS";
+
+	private static final int RC_SIGN_IN = 123;
+	private TextView loginLogoutTextView;
+	private FirebaseAuth mAuth;
+	private GoogleSignInClient googleSignInClient;
 
 	public static SettingsFragment makeInstance() {
 		SettingsFragment fragment = new SettingsFragment();
@@ -61,11 +77,33 @@ public class SettingsFragment extends BaseFragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		if (mRootView == null) {
 			mRootView = inflater.inflate(R.layout.fragment_settings, null);
+
+			mAuth = FirebaseAuth.getInstance();
+
+			// Configure Google Sign-In
+			GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+					.requestIdToken(getString(R.string.default_web_client_id)) // Replace with your web client ID from Firebase
+					.requestEmail()
+					.build();
+			googleSignInClient = GoogleSignIn.getClient(getContext(), gso);
+
+			loginLogoutTextView = mRootView.findViewById(R.id.settings_login_logout);
+			updateLoginStatus();
+
+			// Click Listener for Login/Logout
+			loginLogoutTextView.setOnClickListener(v -> {
+				if (mAuth.getCurrentUser() == null) {
+					signIn();
+				} else {
+					signOut();
+				}
+			});
+
 			final Context context = mRootView.getContext();
 			mRootView.findViewById(R.id.settings_github).setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					final String url = "https://github.com/Mixiaoxiao/Weather";
+					final String url = "https://github.com/jeffrey4341/FYPWeatherAPP";
 					Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
 					context.startActivity(Intent.createChooser(intent, url));
 				}
@@ -109,6 +147,50 @@ public class SettingsFragment extends BaseFragment {
 		return mRootView;
 	}
 
+	private void signIn() {
+		Intent signInIntent = googleSignInClient.getSignInIntent();
+		startActivityForResult(signInIntent, RC_SIGN_IN);
+	}
+
+	private void signOut() {
+		mAuth.signOut();
+		googleSignInClient.signOut().addOnCompleteListener(requireActivity(), task -> {
+			Toast.makeText(getContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
+			// Delay execution to allow the toast to be visible
+			new android.os.Handler().postDelayed(() -> {
+				clearAppData();
+				restartApplication();
+			}, 1000); // 1 second delay
+		});
+	}
+
+	// Method to clear app data and cache
+	private void clearAppData() {
+		try {
+			Runtime runtime = Runtime.getRuntime();
+			runtime.exec("pm clear " + requireContext().getPackageName());
+		} catch (Exception e) {
+			Log.e("SettingsFragment", "Failed to clear app data: ", e);
+		}
+	}
+
+	// Method to restart the application
+	private void restartApplication() {
+		Intent intent = new Intent(requireContext(), MainActivity.class); // Replace 'MainActivity' with your launcher activity
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+		startActivity(intent);
+		requireActivity().finish(); // Finish the current activity
+		//System.exit(0); // Optional: Forcefully close the app process
+	}
+
+	private void updateLoginStatus() {
+		if (mAuth.getCurrentUser() != null) {
+			loginLogoutTextView.setText("Logout");
+		} else {
+			loginLogoutTextView.setText("Login");
+		}
+	}
+
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
@@ -124,7 +206,31 @@ public class SettingsFragment extends BaseFragment {
 		
 	}
 
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
 
+		if (requestCode == RC_SIGN_IN && resultCode == Activity.RESULT_OK) {
+			GoogleSignInAccount account = GoogleSignIn.getSignedInAccountFromIntent(data).getResult();
+			if (account != null) {
+				firebaseAuthWithGoogle(account);
+			}
+		}
+	}
+
+	private void firebaseAuthWithGoogle(GoogleSignInAccount account) {
+		AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
+		mAuth.signInWithCredential(credential)
+				.addOnCompleteListener(requireActivity(), task -> {
+					if (task.isSuccessful()) {
+						Toast.makeText(getContext(), "Login successful", Toast.LENGTH_SHORT).show();
+						updateLoginStatus();
+					} else {
+						Log.w("FUCK", "signInWithCredential:failure", task.getException());
+						Toast.makeText(getContext(), "Login failed", Toast.LENGTH_SHORT).show();
+					}
+				});
+	}
 	
 
 	@Override

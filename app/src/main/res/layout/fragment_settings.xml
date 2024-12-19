@@ -90,6 +90,15 @@
             android:layout_width="match_parent"
             android:layout_height="22dp" />
 
+        <TextView
+            android:id="@+id/settings_login_logout"
+            style="@style/cell_single_item_text"
+            android:text="Login" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="22dp" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
