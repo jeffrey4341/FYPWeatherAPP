@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "312650560177",
+    "project_id": "fypweatherapp",
+    "storage_bucket": "fypweatherapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:312650560177:android:20a494411af0b2e70e6890",
+        "android_client_info": {
+          "package_name": "com.jeffrey.fypweatherapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "312650560177-19rqf7nv78u32tnkalmm9ngtpjms83n4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jeffrey.fypweatherapp",
+            "certificate_hash": "ccf5c30055814b7834e894f6d1f03fa9808e8fc1"
+          }
+        },
+        {
+          "client_id": "312650560177-pk3f3piuu40i03imdg66i93399s0ftuj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3jYG9TAPajOgPOCGUVUv2g8nrqavM7Pk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "312650560177-pk3f3piuu40i03imdg66i93399s0ftuj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
