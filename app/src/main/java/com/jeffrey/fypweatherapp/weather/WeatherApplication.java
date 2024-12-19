@@ -5,7 +5,7 @@ import android.app.Application;
 public class WeatherApplication extends Application {
 
 
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
     public static final boolean USE_SAMPLE_DATA = false;
 
     @Override
