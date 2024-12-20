@@ -84,10 +84,10 @@
             android:layout_height="22dp"
             tools:visibility="invisible" />
 
-        <TextView
-            style="@style/cell_single_item_text"
-            android:text="点击天气界面任意位置可选动态天气类型"
-            tools:visibility="invisible" />
+<!--        <TextView-->
+<!--            style="@style/cell_single_item_text"-->
+<!--            android:text="点击天气界面任意位置可选动态天气类型"-->
+<!--            tools:visibility="invisible" />-->
 
         <View
             android:layout_width="match_parent"
