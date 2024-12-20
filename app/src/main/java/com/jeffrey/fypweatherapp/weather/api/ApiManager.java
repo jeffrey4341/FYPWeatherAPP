@@ -19,7 +19,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 import com.jeffrey.fypweatherapp.R;
-import com.jeffrey.fypweatherapp.database.WeatherDatabaseHelper;
+//import com.jeffrey.fypweatherapp.database.WeatherDatabaseHelper;
 import com.jeffrey.fypweatherapp.dynamicweathertype.BaseDrawer;
 import com.jeffrey.fypweatherapp.dynamicweathertype.BaseDrawer.Type;
 import com.jeffrey.fypweatherapp.util.LocationManager;
@@ -88,7 +88,7 @@ public class ApiManager {
 				}
 				reader.close();
 
-				Log.d("FUCK", "API Response: " + response.toString());
+				//Log.d("FUCK", "API Response: " + response.toString());
 				//WeatherJSON = response;
 
 				OpenWeatherJSON parsedData = GSON.fromJson(response.toString(), OpenWeatherJSON.class);
@@ -102,6 +102,7 @@ public class ApiManager {
 
 //				Log.d("ApiManager", "Parsed Weather: " + weather);
 //				Log.d("ApiManager", "Parsed Weather Object: " + weather.toString());
+				Log.d("FUCK", "Area: " + parsedData.timezone);
 //				Log.d("ApiManager", "Latitude: " + parsedData.lat);
 //				Log.d("ApiManager", "Longitude: " + parsedData.lon);
 //				Log.d("ApiManager", "Current Weather: " + parsedData.current.weather.get(0).main);
@@ -128,7 +129,7 @@ public class ApiManager {
 				}
 				aqiReader.close();
 
-				Log.d("FUCK", "API AQI Response: " + aqiResponse.toString());
+				//Log.d("FUCK", "API AQI Response: " + aqiResponse.toString());
 				AQIJSON = aqiResponse;
 
 				AirQualityResponse aqiParsedData = GSON.fromJson(aqiResponse.toString(), AirQualityResponse.class);
@@ -349,7 +350,7 @@ public class ApiManager {
 
 			// Group 2xx: Thunderstorm
 			if (conditionCode >= 200 && conditionCode <= 232) {
-				return isNight ? Type.RAIN_SNOW_N : Type.RAIN_SNOW_D;
+				return isNight ? Type.RAIN_N : Type.RAIN_D;
 			}
 
 			// Group 3xx: Drizzle
@@ -363,13 +364,17 @@ public class ApiManager {
 			}
 
 			// Group 6xx: Snow
-			if (conditionCode >= 600 && conditionCode <= 622) {
+			if (conditionCode >= 600 && conditionCode <= 613) {
 				return isNight ? Type.SNOW_N : Type.SNOW_D;
+			}
+
+			if (conditionCode >= 615&& conditionCode <= 622) {
+				return isNight ? Type.RAIN_SNOW_N : Type.RAIN_SNOW_D;
 			}
 
 			// Group 7xx: Atmosphere (e.g., mist, smoke, haze, dust)
 			if (conditionCode == 701) { // Mist
-				return isNight ? Type.DEFAULT : Type.DEFAULT;
+				return isNight ? Type.FOG_N : Type.FOG_D;
 			} else if (conditionCode == 711) { // Smoke
 				return isNight ? Type.FOG_N : Type.FOG_D;
 			} else if (conditionCode == 721) { // Haze
