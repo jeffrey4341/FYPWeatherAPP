@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -60,7 +61,7 @@ public class SettingsFragment extends BaseFragment {
 	private TextView loginLogoutTextView;
 	private FirebaseAuth mAuth;
 	private GoogleSignInClient googleSignInClient;
-	private List<String> documentIds = new ArrayList<>();
+	private static List<String> documentIds = new ArrayList<>();
 	private List<String> originalLocations = new ArrayList<>();
 
 	public static SettingsFragment makeInstance() {
@@ -280,6 +281,7 @@ public class SettingsFragment extends BaseFragment {
 			}
 		});
 
+
 		// Return Button: Switch back to the main layout
 		returnButton.setOnClickListener(v -> {
 			if (viewSwitcher.getDisplayedChild() == 1) {
@@ -297,53 +299,59 @@ public class SettingsFragment extends BaseFragment {
 			FirebaseFirestore db = FirebaseFirestore.getInstance();
 			String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 			List<String> locationsToDelete = adapter.getLocationsToDelete();
-			// Save updated locations
+
+			// Current location details
 			String locationName = LocationManager.getInstance().getCityname();
 			double latitude = LocationManager.getInstance().getLatitude();
 			double longitude = LocationManager.getInstance().getLongitude();
 
-			// Iterate over the list of locations to delete
-			for (int i = 0; i < locationsToDelete.size(); i++) {
-				String locationId = locationsToDelete.get(i);
+			// Store existing locations to check for duplicates
+			Map<String, Boolean> existingLocations = new HashMap<>();
 
-				// Reference to the specific document in Firestore
-				DocumentReference locationRef = db.collection("users")
-						.document(userId)
-						.collection("locations")
-						.document(locationId);
+			// Step 1: Fetch all existing locations to avoid duplicates
+			db.collection("users")
+					.document(userId)
+					.collection("locations")
+					.get()
+					.addOnSuccessListener(queryDocumentSnapshots -> {
+						for (DocumentSnapshot document : queryDocumentSnapshots) {
+							String name = document.getString("name");
+							Double lat = document.getDouble("latitude");
+							Double lon = document.getDouble("longitude");
 
-				// Check if the current location already exists in Firestore
-				locationRef.get().addOnSuccessListener(documentSnapshot -> {
-					if (documentSnapshot.exists()) {
-						String existingLocationName = documentSnapshot.getString("name");
-
-						// If the location does not match the current one, save it to Firebase
-						if (!locationName.equals(existingLocationName)) {
-							saveLocationToFirebase(locationName, latitude, longitude);
+							// Add location to the map as a key
+							if (name != null && lat != null && lon != null) {
+								String key = name + "_" + lat + "_" + lon;
+								existingLocations.put(key, true);
+							}
 						}
-					} else {
-						// Save the location if the document does not exist
-						saveLocationToFirebase(locationName, latitude, longitude);
-					}
-				}).addOnFailureListener(e -> {
-					Log.e("SettingsFragment", "Error checking location: " + locationId, e);
-				});
-			}
 
-			// Delete marked locations
-			for (String docId : locationsToDelete) {
-				db.collection("users")
-						.document(userId)
-						.collection("locations")
-						.document(docId)
-						.delete()
-						.addOnSuccessListener(aVoid -> Log.d("SettingsFragment", "Deleted location: " + docId))
-						.addOnFailureListener(e -> Log.e("SettingsFragment", "Error deleting location", e));
-			}
+						// Step 2: Save the current location if it's not a duplicate
+						String currentKey = locationName + "_" + latitude + "_" + longitude;
+						if (!existingLocations.containsKey(currentKey)) {
+							saveLocationToFirebase(locationName, latitude, longitude);
+						} else {
+							Log.d("DAMN", "Location already exists: " + locationName);
+						}
 
-			Toast.makeText(requireContext(), "Changes saved!", Toast.LENGTH_SHORT).show();
-			alertDialog.dismiss(); // Close the dialog
+						// Step 3: Delete marked locations
+						for (String docId : locationsToDelete) {
+							db.collection("users")
+									.document(userId)
+									.collection("locations")
+									.document(docId)
+									.delete()
+									.addOnSuccessListener(aVoid -> Log.d("DAMN", "Deleted location: " + docId))
+									.addOnFailureListener(e -> Log.e("DAMN", "Error deleting location", e));
+						}
+
+						// Notify the user
+						Toast.makeText(requireContext(), "Changes saved!", Toast.LENGTH_SHORT).show();
+						alertDialog.dismiss(); // Close the dialog
+					})
+					.addOnFailureListener(e -> Log.e("DAMN", "Error fetching existing locations", e));
 		});
+
 
 
 //		// Add TextWatcher to fetch search results
@@ -389,13 +397,12 @@ public class SettingsFragment extends BaseFragment {
 //	}
 
 	// Save Location to Firebase
-	private void saveLocationToFirebase(String locationName, double latitude, double longitude) {
-		String userId = mAuth.getCurrentUser().getUid();
+	private void saveLocationToFirebase(String name, double latitude, double longitude) {
 		FirebaseFirestore db = FirebaseFirestore.getInstance();
+		String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-		// Prepare Data
 		Map<String, Object> locationData = new HashMap<>();
-		locationData.put("name", locationName);
+		locationData.put("name", name);
 		locationData.put("latitude", latitude);
 		locationData.put("longitude", longitude);
 
@@ -403,15 +410,10 @@ public class SettingsFragment extends BaseFragment {
 				.document(userId)
 				.collection("locations")
 				.add(locationData)
-				.addOnSuccessListener(documentReference -> {
-					Toast.makeText(getContext(), "Location saved successfully!", Toast.LENGTH_SHORT).show();
-					// Optionally reload locations
-				})
-				.addOnFailureListener(e -> {
-					Log.e("SettingsFragment", "Error saving location", e);
-					Toast.makeText(getContext(), "Failed to save location.", Toast.LENGTH_SHORT).show();
-				});
+				.addOnSuccessListener(documentReference -> Log.d("DAMN", "Location saved: " + name))
+				.addOnFailureListener(e -> Log.e("DAMN", "Error saving location", e));
 	}
+
 
 	// Load Saved Locations
 	private void loadSavedLocations(DragSortListView dragSortListView, LocationAdapter adapter) {

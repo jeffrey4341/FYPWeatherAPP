@@ -28,32 +28,32 @@ public class LocationAdapter extends ArrayAdapter<String> {
 		this.documentIds = documentIds;
 	}
 
-//	@NonNull
-//	@Override
-//	public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-//		if (convertView == null) {
-//			convertView = LayoutInflater.from(getContext()).inflate(R.layout.listitem_manage_area, parent, false);
-//		}
-//
-//		TextView locationText = convertView.findViewById(R.id.listitem_manage_area_text);
-//		ImageView deleteButton = convertView.findViewById(R.id.listitem_manage_area_delete_button);
-//
-//		// Set the location name
-//		locationText.setText(locations.get(position));
-//
-//		// Handle delete button click
-//		deleteButton.setOnClickListener(v -> {
-//			// Add the document ID to the delete list
-//			locationsToDelete.add(documentIds.get(position));
-//
-//			// Remove the location from the list
-//			locations.remove(position);
-//			documentIds.remove(position);
-//			notifyDataSetChanged(); // Refresh the ListView
-//		});
-//
-//		return convertView;
-//	}
+	@NonNull
+	@Override
+	public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+		if (convertView == null) {
+			convertView = LayoutInflater.from(getContext()).inflate(R.layout.listitem_manage_area, parent, false);
+		}
+
+		TextView locationText = convertView.findViewById(R.id.listitem_manage_area_text);
+		ImageView deleteButton = convertView.findViewById(R.id.listitem_manage_area_delete_button);
+
+		// Set the location name
+		locationText.setText(locations.get(position));
+
+		// Handle delete button click
+		deleteButton.setOnClickListener(v -> {
+			// Add the document ID to the delete list
+			locationsToDelete.add(documentIds.get(position));
+
+			// Remove the location from the list
+			locations.remove(position);
+			documentIds.remove(position);
+			notifyDataSetChanged(); // Refresh the ListView
+		});
+
+		return convertView;
+	}
 
 	public List<String> getLocationsToDelete() {
 		return locationsToDelete;
