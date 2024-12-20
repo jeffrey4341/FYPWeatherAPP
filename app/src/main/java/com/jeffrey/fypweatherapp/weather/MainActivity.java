@@ -320,6 +320,8 @@ public class MainActivity extends FragmentActivity {
 			public void onWeatherFetched(Weather weather) {
 				if (weather != null) {
 					if (mAuth.getCurrentUser() != null) {
+						String cityName = weather.getOpenWeatherJSON().timezone;
+						LocationManager.getInstance().setCityname(cityName);
 						fetchUserLocationsAndWeather(latitude, longitude, weather);
 					} else {
 						setupViewPagerForGuest(weather);
@@ -443,8 +445,7 @@ private BaseFragment[] createFragmentsForLoggedInUser(Weather currentWeather, Li
 
 				Weather weather = ApiManager.fetchWeather(latitude, longitude);
 				if (weather != null) {
-					String cityName = weather.getOpenWeatherJSON().timezone;
-					LocationManager.getInstance().setCityname(cityName);
+
 					try {
 						WeatherPrediction weatherPrediction = new WeatherPrediction(this);
 
