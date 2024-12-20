@@ -425,7 +425,7 @@
                 style="@style/w_section_title"
                 android:text="24-Hour Detailed Forecast" />
 
-            <LinearLayout
+            <com.jeffrey.fypweatherapp.weather.widget.Forecast24HoursView
                 android:id="@+id/w_24hour_forecast"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -441,7 +441,7 @@
                 style="@style/w_section_title"
                 android:text="7-Day Detailed Forecast" />
 
-            <LinearLayout
+            <com.jeffrey.fypweatherapp.weather.widget.Forecast7DaysView
                 android:id="@+id/w_7day_forecast"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

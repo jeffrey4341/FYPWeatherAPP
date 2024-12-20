@@ -15,9 +15,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.gson.Gson;
 import com.jeffrey.fypweatherapp.R;
 import com.jeffrey.fypweatherapp.dynamicweathertype.BaseDrawer;
@@ -29,6 +31,7 @@ import com.jeffrey.fypweatherapp.util.UiUtil;
 import com.jeffrey.fypweatherapp.weather.api.ApiManager;
 //import com.jeffrey.fypweatherapp.weather.api.ApiManager.Area;
 import com.jeffrey.fypweatherapp.weather.api.entity.AirQualityResponse;
+import com.jeffrey.fypweatherapp.weather.api.entity.CityName;
 import com.jeffrey.fypweatherapp.weather.api.entity.OpenWeatherJSON;
 import com.jeffrey.fypweatherapp.weather.api.entity.Weather;
 import com.jeffrey.fypweatherapp.weather.api.entity.DailyForecast;
@@ -38,6 +41,8 @@ import com.jeffrey.fypweatherapp.weather.api.entity.CurrentWeather;
 import com.jeffrey.fypweatherapp.weather.widget.AqiView;
 import com.jeffrey.fypweatherapp.weather.widget.AstroView;
 import com.jeffrey.fypweatherapp.weather.widget.DailyForecastView;
+import com.jeffrey.fypweatherapp.weather.widget.Forecast24HoursView;
+import com.jeffrey.fypweatherapp.weather.widget.Forecast7DaysView;
 import com.jeffrey.fypweatherapp.weather.widget.HourlyForecastView;
 import com.jeffrey.fypweatherapp.weather.widget.PullRefreshLayout;
 
@@ -49,32 +54,86 @@ public class WeatherFragment extends BaseFragment {
 
 	private View mRootView;
 	private Weather mWeather;
+	private CityName mCityName;
 	private DailyForecastView mDailyForecastView;
 	private PullRefreshLayout pullRefreshLayout;
 	private HourlyForecastView mHourlyForecastView;
-	private AqiView mAqiView;
+	private Forecast7DaysView mForecast7DaysView;
+	private Forecast24HoursView mForecast24HoursView;
+	private TextView mRainPrediction;
+    private AqiView mAqiView;
 	private AstroView mAstroView;
 	//private Area mArea;
 	private ScrollView mScrollView;
 	private BaseDrawer.Type mDrawerType = BaseDrawer.Type.UNKNOWN_D;
+	private FirebaseAuth mAuth;
+	private static final String BUNDLE_EXTRA_CITY = "BUNDLE_EXTRA_CITY";
 	private static final String BUNDLE_EXTRA_WEATHER = "BUNDLE_EXTRA_WEATHER";
 	private String airQuality = "";
+	private String[] prediction7Days;
+	private String[] prediction24Hours;
+	private float willRainPercent;
+	private boolean willRain;
+//	private static String[] prediction7Days = new String[]{""};
+//	private static String[] prediction24Hours = new String[]{""};
+//	private static float WillRainPercent = 0;
+//	private static boolean WillRain = false;
 
 	public BaseDrawer.Type getDrawerType() {
 		return this.mDrawerType;
 	}
 
-	public static WeatherFragment makeInstance(Weather weather) {
+//	public static WeatherFragment makeInstance(Weather weather, String[] predictions7Days, String[] predictions24Hours, float willRainPercent, boolean willRain, List<CityName> cityName) {
+//		WeatherFragment fragment = new WeatherFragment();
+//		Bundle bundle = new Bundle();
+//		if (cityName != null) {
+//			for (int i = 0; i < cityName.size(); i++) {
+//				bundle.putSerializable(BUNDLE_EXTRA_CITY, cityName.get(i));
+//			}
+//		}
+//		if (weather != null) {
+//			bundle.putSerializable(BUNDLE_EXTRA_WEATHER, weather);
+//		}
+//		fragment.setArguments(bundle);
+//		prediction7Days = predictions7Days;
+//		prediction24Hours = predictions24Hours;
+//		WillRainPercent = willRainPercent;
+//		WillRain = willRain;
+//		return fragment;
+//	}
+	public static WeatherFragment makeInstance(Weather weather, String[] predictions7Days, String[] predictions24Hours, float willRainPercent, boolean willRain, List<CityName> cityName) {
 		WeatherFragment fragment = new WeatherFragment();
 		Bundle bundle = new Bundle();
-		if (weather != null) {
-			bundle.putSerializable(BUNDLE_EXTRA_WEATHER, weather);
+
+		if (cityName != null) {
+			bundle.putSerializable(BUNDLE_EXTRA_CITY, (Serializable) cityName); // Pass the entire list
 		}
+
+		if (weather != null) {
+			bundle.putSerializable(BUNDLE_EXTRA_WEATHER, weather); // Pass weather data
+		}
+
 		fragment.setArguments(bundle);
+
+		// Assign values to the fragment instance (not static fields)
+		fragment.prediction7Days = predictions7Days;
+		fragment.prediction24Hours = predictions24Hours;
+		fragment.willRainPercent = willRainPercent;
+		fragment.willRain = willRain;
+
 		return fragment;
 	}
 
+
 	private void fetchArguments() {
+		if (this.mCityName == null) {
+			try {
+				assert getArguments() != null;
+				this.mCityName = (CityName) getArguments().getSerializable(BUNDLE_EXTRA_CITY);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 		if (this.mWeather == null) {
 			try {
                 assert getArguments() != null;
@@ -101,6 +160,9 @@ public class WeatherFragment extends BaseFragment {
 			mAqiView = mRootView.findViewById(R.id.w_aqi_view);
 			mAstroView = mRootView.findViewById(R.id.w_astroView);
 			mScrollView = mRootView.findViewById(R.id.w_WeatherScrollView);
+			mForecast7DaysView = mRootView.findViewById(R.id.w_7day_forecast);
+			mForecast24HoursView = mRootView.findViewById(R.id.w_24hour_forecast);
+			mRainPrediction = mRootView.findViewById(R.id.w_rain_prediction);
 
 			pullRefreshLayout.setOnRefreshListener(new PullRefreshLayout.OnRefreshListener() {
 				@Override
@@ -344,6 +406,7 @@ public class WeatherFragment extends BaseFragment {
 
 		OpenWeatherJSON w = mWeather.getOpenWeatherJSON();
 		AirQualityResponse a = mWeather.getAirQualityResponse();
+
 		Log.d("WeatherFragment", "OpenWeatherJSON: " + w);
 		Log.d("WeatherFragment", "AirQualityResponse: " + a);
 
@@ -380,6 +443,8 @@ public class WeatherFragment extends BaseFragment {
 			mHourlyForecastView.setData(mWeather);
 			mAqiView.setData(mWeather.AirQualityResponse);
 			mAstroView.setData(mWeather);
+			mForecast7DaysView.displayForecast(prediction7Days);
+			mForecast24HoursView.displayForecast(prediction24Hours);
 
 			final int conditionCode = mWeather.OpenWeatherJSON.current.weather.get(0).id;
 
@@ -410,7 +475,7 @@ public class WeatherFragment extends BaseFragment {
 			// Group 7xx: Atmosphere (e.g., mist, smoke, haze, dust)
 			if (conditionCode == 701) { // Mist
 				mRootView.findViewById(R.id.w_weather_icon)
-						.setForeground(ContextCompat.getDrawable(getContext(), R.drawable.cond_icon_na));
+						.setForeground(ContextCompat.getDrawable(getContext(), R.drawable.cond_icon_foggy));
 			} else if (conditionCode == 711) { // Smoke
 				mRootView.findViewById(R.id.w_weather_icon)
 						.setForeground(ContextCompat.getDrawable(getContext(), R.drawable.cond_icon_haze));
@@ -568,12 +633,25 @@ public class WeatherFragment extends BaseFragment {
 //				setTextViewString(R.id.w_suggestion_uv_brf, w.alerts.toString());
 //			}
 
+					// Rain Prediction
+
+				mRainPrediction.setText(willRain
+						? "Rain expected in the next hour.\nRain Percentage: " + willRainPercent * 100 + "%"
+						: "No rain expected in the next hour.\nRain Percentage: " + willRainPercent * 100 + "%");
+
+//
+//				} catch (Exception e) {
+//					Log.e("FUCK", "Error updating weather UI", e);
+//				}
+//
 		} catch (Exception e) {
 			e.printStackTrace();
 			UiUtil.toastDebug(getContext(), "Error updating UI: " + e.getMessage());
 		}
 
 	}
+
+
 
 	@Override
 	public void onDestroy() {
@@ -592,13 +670,22 @@ public class WeatherFragment extends BaseFragment {
 
 	@Override
 	public String getTitle() {
-		if (mWeather != null && mWeather.getOpenWeatherJSON() != null && mWeather.getOpenWeatherJSON().current != null) {
-			// Assuming the weather object has a location or name to derive the title
-			String cityName = mWeather.getOpenWeatherJSON().timezone; // Replace with a valid field from the weather object
-			return cityName != null ? cityName : "Weather";
-		}
-		return "Weather";
-	}
+        String cityName = "Weather";
+        if (mWeather != null && mWeather.getOpenWeatherJSON() != null && mWeather.getOpenWeatherJSON().current != null) {
+            // Assuming the weather object has a location or name to derive the title
+            cityName = mWeather.getOpenWeatherJSON().timezone;
+
+        } else {
+           fetchArguments();
+		   if (this.mCityName != null) {
+			   return mCityName.getName();
+		   }
+        }
+		Log.d("FUCK", cityName);
+        return cityName;
+    }
+
+
 
 	@Override
 	public void onResume() {
