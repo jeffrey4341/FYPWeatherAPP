@@ -128,7 +128,6 @@ public class WeatherFragment extends BaseFragment {
 	private void fetchArguments() {
 		if (this.mCityName == null) {
 			try {
-				assert getArguments() != null;
 				this.mCityName = (CityName) getArguments().getSerializable(BUNDLE_EXTRA_CITY);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -136,7 +135,6 @@ public class WeatherFragment extends BaseFragment {
 		}
 		if (this.mWeather == null) {
 			try {
-                assert getArguments() != null;
                 this.mWeather = (Weather) getArguments().getSerializable(BUNDLE_EXTRA_WEATHER);
 			} catch (Exception e) {
 				e.printStackTrace();
