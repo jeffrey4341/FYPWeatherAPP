@@ -37,7 +37,7 @@ public class WeatherPrediction {
     }
 
     public String[] predictWeatherDescription7Days(float[][][] inputData) {
-        Log.w("FUCK", "Input shape: " + inputData.length + "," + inputData[0].length + "," + inputData[0][0].length);
+        //Log.w("FUCK", "Input shape: " + inputData.length + "," + inputData[0].length + "," + inputData[0][0].length);
 
         // Validate inputData shape
         if (inputData.length != 1 || inputData[0].length != 7 || inputData[0][0].length != 9) {
@@ -62,7 +62,7 @@ public class WeatherPrediction {
             interpreter7Days.run(singleDayInput, outputData);
 
             // Decode and store the prediction for this day
-            Log.d("FUCK", "7day" + Arrays.deepToString(outputData));
+            //Log.d("FUCK", "7day" + Arrays.deepToString(outputData));
             weatherDescriptions[day] = decodeWeatherDescription(outputData[0]);
         }
 
@@ -83,7 +83,7 @@ public class WeatherPrediction {
 
 
     public String[] predictWeatherDescription24Hours(float[][][] inputData) {
-        Log.w("FUCK", "Input shape: " + inputData.length + "," + inputData[0].length + "," + inputData[0][0].length);
+        //Log.w("FUCK", "Input shape: " + inputData.length + "," + inputData[0].length + "," + inputData[0][0].length);
 
         // Validate inputData shape
         if (inputData.length != 1 || inputData[0].length != 24 || inputData[0][0].length != 9) {
@@ -108,7 +108,7 @@ public class WeatherPrediction {
             interpreter7Days.run(singleDayInput, outputData);
 
             // Decode and store the prediction for this day
-            Log.d("FUCK", Arrays.deepToString(outputData));
+            //Log.d("FUCK", Arrays.deepToString(outputData));
             weatherDescriptions[hour] = decodeWeatherDescription(outputData[0]);
         }
 
@@ -122,7 +122,7 @@ public class WeatherPrediction {
     }
 
     private String decodeWeatherDescription(float[] logits) {
-        Log.e("FUCK", "Logits: " + Arrays.toString(logits));
+        //Log.e("FUCK", "Logits: " + Arrays.toString(logits));
 
         // Map index to weather descriptions
         String[] weatherMain = {"Clouds", "\nThunderstorm", "\nRain", "\nClear", "\nMist"};
