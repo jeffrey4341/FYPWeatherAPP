@@ -20,6 +20,7 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 import com.jeffrey.fypweatherapp.R;
 //import com.jeffrey.fypweatherapp.database.WeatherDatabaseHelper;
+import com.jeffrey.fypweatherapp.database.WeatherDatabaseHelper;
 import com.jeffrey.fypweatherapp.dynamicweathertype.BaseDrawer;
 import com.jeffrey.fypweatherapp.dynamicweathertype.BaseDrawer.Type;
 import com.jeffrey.fypweatherapp.util.LocationManager;
@@ -230,6 +231,36 @@ public class ApiManager {
 //		}
 		return null;
 	}
+
+//	public static Weather getWeather(Context context, String city) {
+//		WeatherDatabaseHelper dbHelper = new WeatherDatabaseHelper(context);
+//		SQLiteDatabase db = dbHelper.getReadableDatabase();
+//
+//		String[] columns = {
+//				WeatherDatabaseHelper.COLUMN_WEATHER_JSON,
+//				WeatherDatabaseHelper.COLUMN_LAST_UPDATED
+//		};
+//
+//		String selection = WeatherDatabaseHelper.COLUMN_CITY + " = ?";
+//		String[] selectionArgs = {city};
+//
+//		Cursor cursor = db.query(WeatherDatabaseHelper.TABLE_WEATHER, columns, selection, selectionArgs, null, null, null);
+//
+//		Weather weather = null;
+//		int weatherJsonIndex = cursor.getColumnIndex(WeatherDatabaseHelper.COLUMN_WEATHER_JSON);
+//		if (weatherJsonIndex != -1) {
+//			String weatherJson = cursor.getString(weatherJsonIndex);
+//			weather = new Gson().fromJson(weatherJson, Weather.class);
+//		} else {
+//			Log.e("DatabaseError", "Column not found: " + WeatherDatabaseHelper.COLUMN_WEATHER_JSON);
+//		}
+//
+//
+//		cursor.close();
+//		db.close();
+//		return weather;
+//	}
+
 
 //	public static ArrayList<Area> loadSelectedArea(Context context) {
 //		ArrayList<Area> areas = new ArrayList<ApiManager.Area>();
@@ -558,6 +589,21 @@ public class ApiManager {
 		Log.d("isNight", "Default return false.");
 		return false;
 	}
+
+	public static void saveWeather(Context context, String city, Weather weather) {
+		WeatherDatabaseHelper dbHelper = new WeatherDatabaseHelper(context);
+		SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+		ContentValues values = new ContentValues();
+		values.put(WeatherDatabaseHelper.COLUMN_CITY, city);
+		values.put(WeatherDatabaseHelper.COLUMN_WEATHER_JSON, new Gson().toJson(weather));
+		//values.put(WeatherDatabaseHelper.COLUMN_AIR_QUALITY_JSON, new Gson().toJson(airQuality));
+		values.put(WeatherDatabaseHelper.COLUMN_LAST_UPDATED, System.currentTimeMillis());
+
+		db.insert(WeatherDatabaseHelper.TABLE_WEATHER, null, values);
+		db.close();
+	}
+
 
 //	public interface GeocodingApiService {
 //		@GET("geocode/json")

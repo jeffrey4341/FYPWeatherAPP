@@ -404,9 +404,11 @@ public class MainActivity extends FragmentActivity {
 //	}
 private BaseFragment[] createFragmentsForLoggedInUser(Weather currentWeather, List<CityName> userLocations) throws InterruptedException {
 	// Add 3 dummy locations
-	userLocations.add(new CityName("Dummy Location 1", 40.7128, -74.0060)); // New York
-	userLocations.add(new CityName("Dummy Location 2", 51.5074, -0.1278));  // London
-	userLocations.add(new CityName("Dummy Location 3", 35.6895, 139.6917)); // Tokyo
+	userLocations.add(new CityName("Dummy Location 1", 1.479858, 103.764258)); // Johor Bahru
+	userLocations.add(new CityName("Dummy Location 2", 2.189594, 102.250087));  // Melaka
+	userLocations.add(new CityName("Dummy Location 3", 5.420404, 116.796785)); // Sabah
+	userLocations.add(new CityName("Dummy Location 4", 3.509247, 101.524805)); // Selangor
+
 
 	final BaseFragment[] fragments = new BaseFragment[userLocations.size() + 2]; // Settings + Weather Fragment
 	fragments[0] = SettingsFragment.makeInstance();
@@ -464,8 +466,8 @@ private BaseFragment[] createFragmentsForLoggedInUser(Weather currentWeather, Li
 						// Log results
 //						Log.d("FUCK", "7-day Predictions: " + Arrays.toString(predictions7Days));
 //						Log.d("FUCK", "24-hour Predictions: " + Arrays.toString(predictions24Hours));
-						Log.d("FUCK", "Rain Percent Predictions: " + willRainPercent);
-						Log.d("FUCK", "Rain Prediction: " + (willRain ? "Rain" : "No Rain"));
+//						Log.d("FUCK", "Rain Percent Predictions: " + willRainPercent);
+//						Log.d("FUCK", "Rain Prediction: " + (willRain ? "Rain" : "No Rain"));
 						fragments[i + 2] = WeatherFragment.makeInstance(weather,predictions7Days,predictions24Hours,willRainPercent, willRain, userLocations);
 					} catch (IOException e) {
 						Log.e("FUCK", "Error in weather prediction", e);
@@ -474,30 +476,31 @@ private BaseFragment[] createFragmentsForLoggedInUser(Weather currentWeather, Li
 					//setupWeatherPrediction(weather);
 				} else {
 					Log.e("FUCK", "Failed to fetch weather for location: " + userLocations.get(i).getName());
-						try {
-							WeatherPrediction weatherPrediction = new WeatherPrediction(this);
-
-							// Prepare input data
-							float[][][] input7Days = prepare7DaysPredictionInput(weather.getOpenWeatherJSON());
-							float[][][] input24Hours = prepare24HoursPredictionInput(weather.getOpenWeatherJSON());
-							float[][][] inputRain = prepareRainPredictionInput(weather.getOpenWeatherJSON());
-
-							// Make predictions
-							String[] predictions7Days = weatherPrediction.predictWeatherDescription7Days(input7Days);
-							String[] predictions24Hours = weatherPrediction.predictWeatherDescription24Hours(input24Hours);
-							float willRainPercent = weatherPrediction.predictRainNextHour(inputRain);
-							boolean willRain;
-							willRain = willRainPercent > 0.5;
-
-							// Log results
-							Log.d("FUCK", "7-day Predictions: " + Arrays.toString(predictions7Days));
-							Log.d("FUCK", "24-hour Predictions: " + Arrays.toString(predictions24Hours));
-							Log.d("FUCK", "Rain Percent Predictions: " + willRainPercent);
-							Log.d("FUCK", "Rain Prediction: " + (willRain ? "Rain" : "No Rain"));
-						fragments[i + 2] = WeatherFragment.makeInstance(weather,predictions7Days,predictions24Hours,willRainPercent, willRain, userLocations); // Fallback fragment
-						} catch (IOException e) {
-							Log.e("FUCK", "Error in weather prediction", e);
-						}
+					return;
+//						try {
+//							WeatherPrediction weatherPrediction = new WeatherPrediction(this);
+//
+//							// Prepare input data
+//							float[][][] input7Days = prepare7DaysPredictionInput(weather.getOpenWeatherJSON());
+//							float[][][] input24Hours = prepare24HoursPredictionInput(weather.getOpenWeatherJSON());
+//							float[][][] inputRain = prepareRainPredictionInput(weather.getOpenWeatherJSON());
+//
+//							// Make predictions
+//							String[] predictions7Days = weatherPrediction.predictWeatherDescription7Days(input7Days);
+//							String[] predictions24Hours = weatherPrediction.predictWeatherDescription24Hours(input24Hours);
+//							float willRainPercent = weatherPrediction.predictRainNextHour(inputRain);
+//							boolean willRain;
+//							willRain = willRainPercent > 0.5;
+//
+//							// Log results
+//							Log.d("FUCK", "7-day Predictions: " + Arrays.toString(predictions7Days));
+//							Log.d("FUCK", "24-hour Predictions: " + Arrays.toString(predictions24Hours));
+//							Log.d("FUCK", "Rain Percent Predictions: " + willRainPercent);
+//							Log.d("FUCK", "Rain Prediction: " + (willRain ? "Rain" : "No Rain"));
+//						fragments[i + 2] = WeatherFragment.makeInstance(weather,predictions7Days,predictions24Hours,willRainPercent, willRain, userLocations); // Fallback fragment
+//						} catch (IOException e) {
+//							Log.e("FUCK", "Error in weather prediction", e);
+//						}
 				}
 			}
 
