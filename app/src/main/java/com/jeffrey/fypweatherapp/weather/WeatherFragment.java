@@ -121,26 +121,43 @@ public class WeatherFragment extends BaseFragment {
 		fragment.willRainPercent = willRainPercent;
 		fragment.willRain = willRain;
 
+		fragment.saveWeather(cityName, weather);
 		return fragment;
+	}
+
+	private void saveWeather(List<CityName> cityName, Weather weather) {
+		//ApiManager.saveWeather(requireContext(), cityName.toString(), weather);
 	}
 
 
 	private void fetchArguments() {
 		if (this.mCityName == null) {
 			try {
-				this.mCityName = (CityName) getArguments().getSerializable(BUNDLE_EXTRA_CITY);
+				Object cityArgument = getArguments().getSerializable(BUNDLE_EXTRA_CITY);
+				if (cityArgument instanceof List<?>) {
+					List<?> cityList = (List<?>) cityArgument;
+					if (!cityList.isEmpty() && cityList.get(0) instanceof CityName) {
+						this.mCityName = (CityName) cityList.get(0); // Use the first item for simplicity
+					}
+				} else if (cityArgument instanceof CityName) {
+					this.mCityName = (CityName) cityArgument;
+				} else {
+					throw new ClassCastException("Unsupported data type for BUNDLE_EXTRA_CITY");
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
+
 		if (this.mWeather == null) {
 			try {
-                this.mWeather = (Weather) getArguments().getSerializable(BUNDLE_EXTRA_WEATHER);
+				this.mWeather = (Weather) getArguments().getSerializable(BUNDLE_EXTRA_WEATHER);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 	}
+
 
 	@Override
 	public void onSaveInstanceState(@NonNull Bundle outState) {
@@ -165,8 +182,10 @@ public class WeatherFragment extends BaseFragment {
 			pullRefreshLayout.setOnRefreshListener(new PullRefreshLayout.OnRefreshListener() {
 				@Override
 				public void onRefresh() {
-					double latitude = LocationManager.getInstance().getLatitude();
-					double longitude = LocationManager.getInstance().getLongitude();
+					fetchArguments();
+					double latitude = mWeather.OpenWeatherJSON.lat;
+					double longitude = mWeather.OpenWeatherJSON.lon;
+
 
 					if (latitude == 0.0 && longitude == 0.0) {
 						UiUtil.toastDebug(getContext(), "Unable to fetch location. Please enable GPS.");
@@ -219,6 +238,7 @@ public class WeatherFragment extends BaseFragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		fetchArguments();
+//		ApiManager.saveWeather(requireContext(), cityName, weather);
 //		double lat = LocationManager.getInstance().getLatitude();
 //		double lon = LocationManager.getInstance().getLongitude();
 //
@@ -231,6 +251,16 @@ public class WeatherFragment extends BaseFragment {
 //		} else {
 //			refreshWeather();
 //			updateWeatherUI();
+//		}
+//		String cityName = mCityName != null ? mCityName.getName() : "default_city"; // Fallback if mCityName is null
+		//Weather cachedWeather = ApiManager.getWeather(requireContext(), cityName);
+
+//		if (cachedWeather != null) {
+//			this.mWeather = cachedWeather;
+//			updateWeatherUI(); // Update UI with cached data
+//		} else {
+//			// If no cached data, fetch new data
+//			refreshWeather();
 //		}
 		UiUtil.logDebug("FUCK", "onCreate");
 	}
