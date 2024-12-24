@@ -105,7 +105,7 @@ public class WeatherPrediction {
             float[][] outputData = new float[1][5]; // Assuming 5 possible classes for weather_main
 
             // Run the model
-            interpreter7Days.run(singleDayInput, outputData);
+            interpreter24Hours.run(singleDayInput, outputData);
 
             // Decode and store the prediction for this day
             //Log.d("FUCK", Arrays.deepToString(outputData));
